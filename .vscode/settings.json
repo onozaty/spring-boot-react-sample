@@ -1,6 +1,6 @@
 {
   "java.jdt.ls.java.home": "/opt/java/openjdk",
   "java.configuration.updateBuildConfiguration": "interactive",
-  "java.format.settings.url": ".vscode/eclipse-java-google-style.xml",
+  "java.format.settings.url": "backend/config/eclipse-java-google-style.xml",
   "editor.formatOnSave": true
 }
