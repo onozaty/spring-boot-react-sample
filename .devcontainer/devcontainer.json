@@ -1,0 +1,16 @@
+{
+  "name": "Spring Boot (Java 25)",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-boot-dev-pack"
+      ]
+    }
+  },
+  "forwardPorts": [8080],
+  "remoteUser": "ubuntu"
+}
