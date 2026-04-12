@@ -32,16 +32,18 @@ class UserControllerIntegrationTest {
 
   @Test
   void testCreate() {
+    // Arrange
     var user = new User();
     user.setName("Test User");
     user.setEmail("test@example.com");
 
+    // Act
     ResponseEntity<User> response = restClient.post().uri("/api/users")
         .contentType(MediaType.APPLICATION_JSON).body(user).retrieve().toEntity(User.class);
 
+    // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     assertThat(response.getHeaders().getLocation()).isNotNull();
-
     var created = response.getBody();
     assertThat(created.getId()).isNotNull();
     assertThat(created.getName()).isEqualTo("Test User");
@@ -50,47 +52,58 @@ class UserControllerIntegrationTest {
 
   @Test
   void testFindAll() {
+    // Arrange
     createUser("User 1", "user1@example.com");
     createUser("User 2", "user2@example.com");
 
+    // Act
     ResponseEntity<User[]> response =
         restClient.get().uri("/api/users").retrieve().toEntity(User[].class);
 
+    // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).hasSize(2);
   }
 
   @Test
   void testFindById() {
+    // Arrange
     var created = createUser("Test User", "test@example.com");
 
+    // Act
     ResponseEntity<User> response =
         restClient.get().uri("/api/users/{id}", created.getId()).retrieve().toEntity(User.class);
 
+    // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody().getName()).isEqualTo("Test User");
   }
 
   @Test
   void testFindByIdNotFound() {
+    // Act
     ResponseEntity<Void> response = restClient.get().uri("/api/users/{id}", 999L).retrieve()
         .onStatus(status -> status.is4xxClientError(), (req, res) -> {
         }).toBodilessEntity();
 
+    // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
   }
 
   @Test
   void testUpdate() {
+    // Arrange
     var created = createUser("Original", "original@example.com");
 
     var updatedUser = new User();
     updatedUser.setName("Updated");
     updatedUser.setEmail("updated@example.com");
 
+    // Act
     ResponseEntity<User> response = restClient.put().uri("/api/users/{id}", created.getId())
         .contentType(MediaType.APPLICATION_JSON).body(updatedUser).retrieve().toEntity(User.class);
 
+    // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody().getName()).isEqualTo("Updated");
     assertThat(response.getBody().getEmail()).isEqualTo("updated@example.com");
@@ -98,40 +111,46 @@ class UserControllerIntegrationTest {
 
   @Test
   void testUpdateNotFound() {
+    // Arrange
     var user = new User();
     user.setName("Test");
     user.setEmail("test@example.com");
 
+    // Act
     ResponseEntity<Void> response =
         restClient.put().uri("/api/users/{id}", 999L).contentType(MediaType.APPLICATION_JSON)
             .body(user).retrieve().onStatus(status -> status.is4xxClientError(), (req, res) -> {
             }).toBodilessEntity();
 
+    // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
   }
 
   @Test
   void testDelete() {
+    // Arrange
     var created = createUser("To Delete", "delete@example.com");
 
+    // Act
     ResponseEntity<Void> deleteResponse =
         restClient.delete().uri("/api/users/{id}", created.getId()).retrieve().toBodilessEntity();
 
+    // Assert
     assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-
     ResponseEntity<Void> getResponse = restClient.get().uri("/api/users/{id}", created.getId())
         .retrieve().onStatus(status -> status.is4xxClientError(), (req, res) -> {
         }).toBodilessEntity();
-
     assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
   }
 
   @Test
   void testDeleteNotFound() {
+    // Act
     ResponseEntity<Void> response = restClient.delete().uri("/api/users/{id}", 999L).retrieve()
         .onStatus(status -> status.is4xxClientError(), (req, res) -> {
         }).toBodilessEntity();
 
+    // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
   }
 

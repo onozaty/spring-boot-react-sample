@@ -1,7 +1,6 @@
 package com.github.onozaty.sample.controller;
 
 import com.github.onozaty.sample.domain.User;
-import com.github.onozaty.sample.service.UserNotFoundException;
 import com.github.onozaty.sample.service.UserService;
 import java.net.URI;
 import java.util.List;
@@ -33,11 +32,7 @@ public class UserController {
 
   @GetMapping("/{id}")
   public ResponseEntity<User> findById(@PathVariable Long id) {
-    try {
-      return ResponseEntity.ok(userService.findById(id));
-    } catch (UserNotFoundException e) {
-      return ResponseEntity.notFound().build();
-    }
+    return ResponseEntity.ok(userService.findById(id));
   }
 
   @PostMapping
@@ -50,20 +45,12 @@ public class UserController {
 
   @PutMapping("/{id}")
   public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User user) {
-    try {
-      return ResponseEntity.ok(userService.update(id, user));
-    } catch (UserNotFoundException e) {
-      return ResponseEntity.notFound().build();
-    }
+    return ResponseEntity.ok(userService.update(id, user));
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(@PathVariable Long id) {
-    try {
-      userService.delete(id);
-      return ResponseEntity.noContent().build();
-    } catch (UserNotFoundException e) {
-      return ResponseEntity.notFound().build();
-    }
+    userService.delete(id);
+    return ResponseEntity.noContent().build();
   }
 }

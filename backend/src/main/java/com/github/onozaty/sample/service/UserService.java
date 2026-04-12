@@ -27,15 +27,13 @@ public class UserService {
   }
 
   public User create(User user) {
-    userMapper.insert(user);
-    return userMapper.findById(user.getId()).orElseThrow();
+    return userMapper.insert(user);
   }
 
   public User update(Long id, User user) {
     findById(id); // 存在確認
     user.setId(id);
-    userMapper.update(user);
-    return userMapper.findById(id).orElseThrow();
+    return userMapper.update(user);
   }
 
   public void delete(Long id) {

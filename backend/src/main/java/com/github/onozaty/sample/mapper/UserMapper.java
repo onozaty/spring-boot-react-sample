@@ -4,11 +4,8 @@ import com.github.onozaty.sample.domain.User;
 import java.util.List;
 import java.util.Optional;
 import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
 
 @Mapper
 public interface UserMapper {
@@ -27,21 +24,22 @@ public interface UserMapper {
       """)
   Optional<User> findById(Long id);
 
-  @Insert("""
+  @Select("""
       INSERT INTO users (name, email, created_at, updated_at)
       VALUES (#{name}, #{email}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      RETURNING *
       """)
-  @Options(useGeneratedKeys = true, keyProperty = "id")
-  void insert(User user);
+  User insert(User user);
 
-  @Update("""
+  @Select("""
       UPDATE users
       SET name = #{name},
           email = #{email},
           updated_at = CURRENT_TIMESTAMP
       WHERE id = #{id}
+      RETURNING *
       """)
-  void update(User user);
+  User update(User user);
 
   @Delete("""
       DELETE FROM users
