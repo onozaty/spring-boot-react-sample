@@ -1,6 +1,12 @@
 {
   "java.jdt.ls.java.home": "/opt/java/openjdk",
   "java.configuration.updateBuildConfiguration": "interactive",
-  "java.format.settings.url": "backend/config/eclipse-java-google-style.xml",
-  "editor.formatOnSave": true
+  "java.format.settings.url": "${workspaceFolder}/backend/config/eclipse-java-google-style.xml",
+  "java.format.settings.profile": "GoogleStyle",
+  "editor.formatOnSave": true,
+  "[java]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false
+  }
 }
