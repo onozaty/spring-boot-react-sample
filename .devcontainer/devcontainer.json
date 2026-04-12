@@ -7,10 +7,11 @@
     "vscode": {
       "extensions": [
         "vscjava.vscode-java-pack",
+        "vscjava.vscode-java-test",
         "vmware.vscode-boot-dev-pack"
       ]
     }
   },
-  "postCreateCommand": "sudo chown -R ubuntu:ubuntu /home/ubuntu/.gradle",
+  "postCreateCommand": "sudo chown -R ubuntu:ubuntu /home/ubuntu/.gradle /home/ubuntu/.claude",
   "remoteUser": "ubuntu"
 }
