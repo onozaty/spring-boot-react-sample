@@ -10,7 +10,13 @@
 ./gradlew :backend:spotlessApply
 ```
 
-### 2. テスト
+### 2. 静的解析
+
+```bash
+./gradlew :backend:spotbugsMain :backend:spotbugsTest
+```
+
+### 3. テスト
 
 ```bash
 ./gradlew :backend:test

@@ -3,6 +3,7 @@ plugins {
     id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.4.0"
+    id("com.github.spotbugs") version "6.4.12"
 }
 
 group = "com.github.onozaty"
@@ -26,6 +27,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    spotbugs("com.github.spotbugs:spotbugs:4.9.8")
 }
 
 tasks.withType<Test> {
@@ -33,6 +35,13 @@ tasks.withType<Test> {
     testLogging {
         events("passed", "failed", "skipped")
     }
+}
+
+spotbugs {
+    ignoreFailures = false
+    effort = com.github.spotbugs.snom.Effort.MAX
+    reportLevel = com.github.spotbugs.snom.Confidence.MEDIUM
+    excludeFilter = file("config/spotbugs-exclude.xml")
 }
 
 spotless {
