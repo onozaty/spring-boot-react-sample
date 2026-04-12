@@ -4,6 +4,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.4.0"
     id("com.github.spotbugs") version "6.4.12"
+    jacoco
 }
 
 group = "com.github.onozaty"
@@ -34,6 +35,14 @@ tasks.withType<Test> {
     useJUnitPlatform()
     testLogging {
         events("passed", "failed", "skipped")
+    }
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        html.required = true
     }
 }
 
