@@ -1,6 +1,8 @@
 package com.github.onozaty.sample.domain;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 @Schema(description = "ユーザー")
@@ -9,9 +11,12 @@ public class User {
   @Schema(description = "ユーザーID", accessMode = Schema.AccessMode.READ_ONLY)
   private Long id;
 
+  @NotBlank
   @Schema(description = "名前", requiredMode = Schema.RequiredMode.REQUIRED)
   private String name;
 
+  @NotBlank
+  @Email
   @Schema(description = "メールアドレス", requiredMode = Schema.RequiredMode.REQUIRED)
   private String email;
 

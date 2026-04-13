@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +51,7 @@ public class UserController {
   @PostMapping
   @Operation(summary = "ユーザー作成", description = "新しいユーザーを登録します")
   @ApiResponses({@ApiResponse(responseCode = "201", description = "作成成功"),})
-  public ResponseEntity<User> create(@RequestBody User user) {
+  public ResponseEntity<User> create(@Valid @RequestBody User user) {
     User created = userService.create(user);
     URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
         .buildAndExpand(created.getId()).toUri();
@@ -63,7 +64,7 @@ public class UserController {
       @ApiResponse(responseCode = "404", description = "ユーザーが存在しない")})
   public ResponseEntity<User> update(
       @Parameter(description = "ユーザーID", required = true) @PathVariable Long id,
-      @RequestBody User user) {
+      @Valid @RequestBody User user) {
     return ResponseEntity.ok(userService.update(id, user));
   }
 
