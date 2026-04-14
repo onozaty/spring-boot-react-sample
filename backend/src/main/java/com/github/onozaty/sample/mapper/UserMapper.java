@@ -10,28 +10,32 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface UserMapper {
 
-  @Select("""
+  @Select(
+      """
       SELECT id, name, email, created_at, updated_at
       FROM users
       ORDER BY id
       """)
   List<User> findAll();
 
-  @Select("""
+  @Select(
+      """
       SELECT id, name, email, created_at, updated_at
       FROM users
       WHERE id = #{id}
       """)
   Optional<User> findById(Long id);
 
-  @Select("""
+  @Select(
+      """
       INSERT INTO users (name, email, created_at, updated_at)
       VALUES (#{name}, #{email}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *
       """)
   User insert(User user);
 
-  @Select("""
+  @Select(
+      """
       UPDATE users
       SET name = #{name},
           email = #{email},
@@ -41,7 +45,8 @@ public interface UserMapper {
       """)
   User update(User user);
 
-  @Delete("""
+  @Delete(
+      """
       DELETE FROM users
       WHERE id = #{id}
       """)

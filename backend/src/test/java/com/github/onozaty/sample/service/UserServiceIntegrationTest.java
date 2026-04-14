@@ -2,20 +2,18 @@ package com.github.onozaty.sample.service;
 
 import static org.assertj.core.api.Assertions.*;
 
+import com.github.onozaty.sample.DatabaseResetExtension;
 import com.github.onozaty.sample.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.github.onozaty.sample.DatabaseResetExtension;
-
 @SpringBootTest
 @ExtendWith(DatabaseResetExtension.class)
 class UserServiceIntegrationTest {
 
-  @Autowired
-  private UserService userService;
+  @Autowired private UserService userService;
 
   @Test
   void testCreateAndFindById() {

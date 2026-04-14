@@ -1,13 +1,14 @@
 {
   "java.jdt.ls.java.home": "/opt/java/openjdk",
   "java.configuration.updateBuildConfiguration": "interactive",
-  "java.format.settings.url": "${workspaceFolder}/backend/config/eclipse-java-google-style.xml",
-  "java.format.settings.profile": "GoogleStyle",
   "editor.formatOnSave": true,
+  "java.format.settings.google.version": "1.35.0",
+  "java.format.settings.google.mode": "jar-file",
   "[java]": {
     "editor.tabSize": 2,
     "editor.insertSpaces": true,
-    "editor.detectIndentation": false
+    "editor.detectIndentation": false,
+    "editor.defaultFormatter": "josevseb.google-java-format-for-vs-code"
   },
   "java.compile.nullAnalysis.mode": "automatic"
 }

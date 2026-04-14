@@ -56,6 +56,6 @@ spotbugs {
 
 spotless {
     java {
-        eclipse().configFile("config/eclipse-java-google-style.xml")
+        googleJavaFormat("1.35.0")
     }
 }
