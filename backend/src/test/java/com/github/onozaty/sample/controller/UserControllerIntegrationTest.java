@@ -2,6 +2,7 @@ package com.github.onozaty.sample.controller;
 
 import static org.assertj.core.api.Assertions.*;
 
+import com.github.onozaty.sample.DatabaseResetExtension;
 import com.github.onozaty.sample.domain.User;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
 
-import com.github.onozaty.sample.DatabaseResetExtension;
-
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ExtendWith(DatabaseResetExtension.class)
 class UserControllerIntegrationTest {
@@ -26,8 +25,7 @@ class UserControllerIntegrationTest {
   private static final ParameterizedTypeReference<Map<String, Object>> PROBLEM_DETAIL_TYPE =
       new ParameterizedTypeReference<>() {};
 
-  @LocalServerPort
-  private int port;
+  @LocalServerPort private int port;
 
   private RestClient restClient;
 
@@ -44,8 +42,14 @@ class UserControllerIntegrationTest {
     user.setEmail("test@example.com");
 
     // Act
-    ResponseEntity<User> response = restClient.post().uri("/api/users")
-        .contentType(MediaType.APPLICATION_JSON).body(user).retrieve().toEntity(User.class);
+    ResponseEntity<User> response =
+        restClient
+            .post()
+            .uri("/api/users")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(user)
+            .retrieve()
+            .toEntity(User.class);
 
     // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -88,9 +92,13 @@ class UserControllerIntegrationTest {
   @Test
   void testFindByIdNotFound() {
     // Act
-    ResponseEntity<Void> response = restClient.get().uri("/api/users/{id}", 999L).retrieve()
-        .onStatus(status -> status.is4xxClientError(), (req, res) -> {
-        }).toBodilessEntity();
+    ResponseEntity<Void> response =
+        restClient
+            .get()
+            .uri("/api/users/{id}", 999L)
+            .retrieve()
+            .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
+            .toBodilessEntity();
 
     // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -106,8 +114,14 @@ class UserControllerIntegrationTest {
     updatedUser.setEmail("updated@example.com");
 
     // Act
-    ResponseEntity<User> response = restClient.put().uri("/api/users/{id}", created.getId())
-        .contentType(MediaType.APPLICATION_JSON).body(updatedUser).retrieve().toEntity(User.class);
+    ResponseEntity<User> response =
+        restClient
+            .put()
+            .uri("/api/users/{id}", created.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(updatedUser)
+            .retrieve()
+            .toEntity(User.class);
 
     // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -124,9 +138,14 @@ class UserControllerIntegrationTest {
 
     // Act
     ResponseEntity<Void> response =
-        restClient.put().uri("/api/users/{id}", 999L).contentType(MediaType.APPLICATION_JSON)
-            .body(user).retrieve().onStatus(status -> status.is4xxClientError(), (req, res) -> {
-            }).toBodilessEntity();
+        restClient
+            .put()
+            .uri("/api/users/{id}", 999L)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(user)
+            .retrieve()
+            .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
+            .toBodilessEntity();
 
     // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -143,18 +162,26 @@ class UserControllerIntegrationTest {
 
     // Assert
     assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-    ResponseEntity<Void> getResponse = restClient.get().uri("/api/users/{id}", created.getId())
-        .retrieve().onStatus(status -> status.is4xxClientError(), (req, res) -> {
-        }).toBodilessEntity();
+    ResponseEntity<Void> getResponse =
+        restClient
+            .get()
+            .uri("/api/users/{id}", created.getId())
+            .retrieve()
+            .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
+            .toBodilessEntity();
     assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
   }
 
   @Test
   void testDeleteNotFound() {
     // Act
-    ResponseEntity<Void> response = restClient.delete().uri("/api/users/{id}", 999L).retrieve()
-        .onStatus(status -> status.is4xxClientError(), (req, res) -> {
-        }).toBodilessEntity();
+    ResponseEntity<Void> response =
+        restClient
+            .delete()
+            .uri("/api/users/{id}", 999L)
+            .retrieve()
+            .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
+            .toBodilessEntity();
 
     // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -169,9 +196,14 @@ class UserControllerIntegrationTest {
 
     // Act & Assert
     ResponseEntity<Map<String, Object>> response =
-        restClient.post().uri("/api/users").contentType(MediaType.APPLICATION_JSON).body(user)
-            .retrieve().onStatus(status -> status.is4xxClientError(), (req, res) -> {
-            }).toEntity(PROBLEM_DETAIL_TYPE);
+        restClient
+            .post()
+            .uri("/api/users")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(user)
+            .retrieve()
+            .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
+            .toEntity(PROBLEM_DETAIL_TYPE);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     assertThat(fieldErrors(response)).anyMatch(e -> "name".equals(e.get("field")));
   }
@@ -185,9 +217,14 @@ class UserControllerIntegrationTest {
 
     // Act & Assert
     ResponseEntity<Map<String, Object>> response =
-        restClient.post().uri("/api/users").contentType(MediaType.APPLICATION_JSON).body(user)
-            .retrieve().onStatus(status -> status.is4xxClientError(), (req, res) -> {
-            }).toEntity(PROBLEM_DETAIL_TYPE);
+        restClient
+            .post()
+            .uri("/api/users")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(user)
+            .retrieve()
+            .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
+            .toEntity(PROBLEM_DETAIL_TYPE);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     assertThat(fieldErrors(response)).anyMatch(e -> "email".equals(e.get("field")));
   }
@@ -202,10 +239,15 @@ class UserControllerIntegrationTest {
     updatedUser.setEmail("updated@example.com");
 
     // Act & Assert
-    ResponseEntity<Map<String, Object>> response = restClient.put()
-        .uri("/api/users/{id}", created.getId()).contentType(MediaType.APPLICATION_JSON)
-        .body(updatedUser).retrieve().onStatus(status -> status.is4xxClientError(), (req, res) -> {
-        }).toEntity(PROBLEM_DETAIL_TYPE);
+    ResponseEntity<Map<String, Object>> response =
+        restClient
+            .put()
+            .uri("/api/users/{id}", created.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(updatedUser)
+            .retrieve()
+            .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
+            .toEntity(PROBLEM_DETAIL_TYPE);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     assertThat(fieldErrors(response)).anyMatch(e -> "name".equals(e.get("field")));
   }
@@ -220,10 +262,15 @@ class UserControllerIntegrationTest {
     updatedUser.setEmail("not-an-email");
 
     // Act & Assert
-    ResponseEntity<Map<String, Object>> response = restClient.put()
-        .uri("/api/users/{id}", created.getId()).contentType(MediaType.APPLICATION_JSON)
-        .body(updatedUser).retrieve().onStatus(status -> status.is4xxClientError(), (req, res) -> {
-        }).toEntity(PROBLEM_DETAIL_TYPE);
+    ResponseEntity<Map<String, Object>> response =
+        restClient
+            .put()
+            .uri("/api/users/{id}", created.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(updatedUser)
+            .retrieve()
+            .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
+            .toEntity(PROBLEM_DETAIL_TYPE);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     assertThat(fieldErrors(response)).anyMatch(e -> "email".equals(e.get("field")));
   }
@@ -232,8 +279,13 @@ class UserControllerIntegrationTest {
     var user = new User();
     user.setName(name);
     user.setEmail(email);
-    return restClient.post().uri("/api/users").contentType(MediaType.APPLICATION_JSON).body(user)
-        .retrieve().body(User.class);
+    return restClient
+        .post()
+        .uri("/api/users")
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(user)
+        .retrieve()
+        .body(User.class);
   }
 
   @SuppressWarnings("unchecked")

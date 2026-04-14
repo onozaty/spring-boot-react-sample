@@ -4,6 +4,8 @@ import com.github.onozaty.sample.domain.User;
 import com.github.onozaty.sample.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,8 +43,10 @@ public class UserController {
 
   @GetMapping("/{id}")
   @Operation(summary = "ユーザー取得", description = "指定したIDのユーザーを取得します")
-  @ApiResponses({@ApiResponse(responseCode = "200", description = "取得成功"),
-      @ApiResponse(responseCode = "404", description = "ユーザーが存在しない")})
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "取得成功"),
+    @ApiResponse(responseCode = "404", description = "ユーザーが存在しない")
+  })
   public ResponseEntity<User> findById(
       @Parameter(description = "ユーザーID", required = true) @PathVariable Long id) {
     return ResponseEntity.ok(userService.findById(id));
@@ -50,18 +54,33 @@ public class UserController {
 
   @PostMapping
   @Operation(summary = "ユーザー作成", description = "新しいユーザーを登録します")
-  @ApiResponses({@ApiResponse(responseCode = "201", description = "作成成功"),})
+  @ApiResponses({
+    @ApiResponse(responseCode = "201", description = "作成成功"),
+    @ApiResponse(
+        responseCode = "400",
+        description = "バリデーションエラー",
+        content = @Content(schema = @Schema(implementation = ValidationProblemDetail.class)))
+  })
   public ResponseEntity<User> create(@Valid @RequestBody User user) {
     User created = userService.create(user);
-    URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-        .buildAndExpand(created.getId()).toUri();
+    URI location =
+        ServletUriComponentsBuilder.fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(created.getId())
+            .toUri();
     return ResponseEntity.created(location).body(created);
   }
 
   @PutMapping("/{id}")
   @Operation(summary = "ユーザー更新", description = "指定したIDのユーザー情報を更新します")
-  @ApiResponses({@ApiResponse(responseCode = "200", description = "更新成功"),
-      @ApiResponse(responseCode = "404", description = "ユーザーが存在しない")})
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "更新成功"),
+    @ApiResponse(
+        responseCode = "400",
+        description = "バリデーションエラー",
+        content = @Content(schema = @Schema(implementation = ValidationProblemDetail.class))),
+    @ApiResponse(responseCode = "404", description = "ユーザーが存在しない")
+  })
   public ResponseEntity<User> update(
       @Parameter(description = "ユーザーID", required = true) @PathVariable Long id,
       @Valid @RequestBody User user) {
@@ -70,8 +89,10 @@ public class UserController {
 
   @DeleteMapping("/{id}")
   @Operation(summary = "ユーザー削除", description = "指定したIDのユーザーを削除します")
-  @ApiResponses({@ApiResponse(responseCode = "204", description = "削除成功"),
-      @ApiResponse(responseCode = "404", description = "ユーザーが存在しない")})
+  @ApiResponses({
+    @ApiResponse(responseCode = "204", description = "削除成功"),
+    @ApiResponse(responseCode = "404", description = "ユーザーが存在しない")
+  })
   public ResponseEntity<Void> delete(
       @Parameter(description = "ユーザーID", required = true) @PathVariable Long id) {
     userService.delete(id);

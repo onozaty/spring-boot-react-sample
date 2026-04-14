@@ -12,12 +12,15 @@ public class User {
   private Long id;
 
   @NotBlank
-  @Schema(description = "名前", requiredMode = Schema.RequiredMode.REQUIRED)
+  @Schema(description = "名前", requiredMode = Schema.RequiredMode.REQUIRED, example = "山田太郎")
   private String name;
 
   @NotBlank
   @Email
-  @Schema(description = "メールアドレス", requiredMode = Schema.RequiredMode.REQUIRED)
+  @Schema(
+      description = "メールアドレス",
+      requiredMode = Schema.RequiredMode.REQUIRED,
+      example = "yamada@example.com")
   private String email;
 
   @Schema(description = "作成日時", accessMode = Schema.AccessMode.READ_ONLY)
