@@ -1,6 +1,7 @@
 FROM eclipse-temurin:25-jdk
 
 ARG GRADLE_VERSION=9.4.1
+ARG NODE_VERSION=24
 
 # 必要パッケージをインストール
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -8,6 +9,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
    curl \
    unzip \
    sudo
+
+# Node.js をインストール
+RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
+   && apt-get install -y --no-install-recommends nodejs
+
+# pnpm をインストール
+RUN npm install -g pnpm
 
 # Dev Containerの実行ユーザー(ubuntu)を用意し、sudoを許可
 RUN if ! id -u ubuntu >/dev/null 2>&1; then useradd -m -s /bin/bash -u 1000 ubuntu; fi \
