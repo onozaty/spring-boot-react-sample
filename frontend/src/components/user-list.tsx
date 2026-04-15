@@ -1,7 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
+import { toast } from 'sonner'
 import { $api } from '@/lib/api-client'
 import type { components } from '@/generated/api'
-import type { FlashMessage } from '@/components/flash-message'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -14,12 +15,7 @@ import {
 
 type User = components['schemas']['User']
 
-interface Props {
-  onEdit: (user: User) => void
-  onFlash: (flash: FlashMessage) => void
-}
-
-export function UserList({ onEdit, onFlash }: Props) {
+export function UserList() {
   const queryClient = useQueryClient()
 
   const { data: users, isPending, isError } = $api.useQuery('get', '/api/users')
@@ -27,10 +23,10 @@ export function UserList({ onEdit, onFlash }: Props) {
   const deleteMutation = $api.useMutation('delete', '/api/users/{id}', {
     onSuccess: () => {
       queryClient.invalidateQueries($api.queryOptions('get', '/api/users'))
-      onFlash({ type: 'success', message: 'ユーザーを削除しました' })
+      toast.success('ユーザーを削除しました')
     },
     onError: () => {
-      onFlash({ type: 'error', message: 'ユーザーの削除に失敗しました' })
+      toast.error('ユーザーの削除に失敗しました')
     },
   })
 
@@ -41,53 +37,47 @@ export function UserList({ onEdit, onFlash }: Props) {
       <p className="mt-8 text-destructive">ユーザーの取得に失敗しました。</p>
     )
 
-  const handleDelete = (userId: number | undefined) => {
-    if (userId === undefined) return
-    deleteMutation.mutate({ params: { path: { id: userId } } })
+  const handleDelete = (user: User) => {
+    if (user.id === undefined) return
+    deleteMutation.mutate({ params: { path: { id: user.id } } })
   }
 
   return (
-    <div className="mt-8">
-      <h2 className="text-xl font-semibold mb-4">ユーザー一覧</h2>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>ID</TableHead>
-            <TableHead>名前</TableHead>
-            <TableHead>メールアドレス</TableHead>
-            <TableHead>作成日時</TableHead>
-            <TableHead />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users?.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell>{user.id}</TableCell>
-              <TableCell>{user.name}</TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{user.createdAt}</TableCell>
-              <TableCell className="text-right space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={deleteMutation.isPending}
-                  onClick={() => onEdit(user)}
-                >
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>ID</TableHead>
+          <TableHead>名前</TableHead>
+          <TableHead>メールアドレス</TableHead>
+          <TableHead>作成日時</TableHead>
+          <TableHead />
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {users?.map((user) => (
+          <TableRow key={user.id}>
+            <TableCell>{user.id}</TableCell>
+            <TableCell>{user.name}</TableCell>
+            <TableCell>{user.email}</TableCell>
+            <TableCell>{user.createdAt}</TableCell>
+            <TableCell className="text-right space-x-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/users/$id/edit" params={{ id: String(user.id) }}>
                   編集
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  disabled={deleteMutation.isPending}
-                  onClick={() => handleDelete(user.id)}
-                >
-                  削除
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+                </Link>
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                disabled={deleteMutation.isPending}
+                onClick={() => handleDelete(user)}
+              >
+                削除
+              </Button>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   )
 }

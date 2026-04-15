@@ -11,7 +11,10 @@ export default defineConfig([
     // shadcn/ui が自動生成するコンポーネント
     'src/components/ui',
     // openapi-typescript が自動生成する型定義
-    'src/generated']),
+    'src/generated',
+    // TanStack Router が自動生成するルートツリー
+    'src/routeTree.gen.ts',
+  ]),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -23,6 +26,14 @@ export default defineConfig([
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+    },
+  },
+  {
+    // TanStack Router のルートファイルは Route と Component を両方 export する仕様のため除外
+    // banner.tsx は Context・フック・コンポーネントをまとめているため除外
+    files: ['src/routes/**/*.{ts,tsx}', 'src/components/banner.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
     },
   },
 ])

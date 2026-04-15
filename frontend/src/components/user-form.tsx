@@ -1,8 +1,8 @@
 import { useState, type SubmitEventHandler } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { $api } from '@/lib/api-client'
 import type { components } from '@/generated/api'
-import type { FlashMessage } from '@/components/flash-message'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,10 +12,9 @@ type User = components['schemas']['User']
 interface Props {
   editingUser: User | null
   onSuccess: () => void
-  onFlash: (flash: FlashMessage) => void
 }
 
-export function UserForm({ editingUser, onSuccess, onFlash }: Props) {
+export function UserForm({ editingUser, onSuccess }: Props) {
   const queryClient = useQueryClient()
   const [name, setName] = useState(editingUser?.name ?? '')
   const [email, setEmail] = useState(editingUser?.email ?? '')
@@ -28,7 +27,7 @@ export function UserForm({ editingUser, onSuccess, onFlash }: Props) {
 
   const createMutation = $api.useMutation('post', '/api/users', {
     onSuccess: () => {
-      onFlash({ type: 'success', message: 'ユーザーを作成しました' })
+      toast.success('ユーザーを作成しました')
       invalidateUsers()
     },
     onError: (error) => {
@@ -36,14 +35,14 @@ export function UserForm({ editingUser, onSuccess, onFlash }: Props) {
       if (errors) {
         setFieldErrors(errors)
       } else {
-        onFlash({ type: 'error', message: 'ユーザーの作成に失敗しました' })
+        toast.error('ユーザーの作成に失敗しました')
       }
     },
   })
 
   const updateMutation = $api.useMutation('put', '/api/users/{id}', {
     onSuccess: () => {
-      onFlash({ type: 'success', message: 'ユーザーを更新しました' })
+      toast.success('ユーザーを更新しました')
       invalidateUsers()
     },
     onError: (error) => {
@@ -51,7 +50,7 @@ export function UserForm({ editingUser, onSuccess, onFlash }: Props) {
       if (errors) {
         setFieldErrors(errors)
       } else {
-        onFlash({ type: 'error', message: 'ユーザーの更新に失敗しました' })
+        toast.error('ユーザーの更新に失敗しました')
       }
     },
   })
@@ -72,9 +71,6 @@ export function UserForm({ editingUser, onSuccess, onFlash }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="border rounded-lg p-6 space-y-4">
-      <h2 className="text-lg font-semibold">
-        {editingUser ? 'ユーザー編集' : 'ユーザー作成'}
-      </h2>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="name">名前</Label>
@@ -102,16 +98,9 @@ export function UserForm({ editingUser, onSuccess, onFlash }: Props) {
           )}
         </div>
       </div>
-      <div className="flex gap-2">
-        <Button type="submit" disabled={isPending}>
-          {editingUser ? '更新' : '作成'}
-        </Button>
-        {editingUser && (
-          <Button type="button" variant="outline" onClick={onSuccess}>
-            キャンセル
-          </Button>
-        )}
-      </div>
+      <Button type="submit" disabled={isPending}>
+        {editingUser ? '更新' : '作成'}
+      </Button>
     </form>
   )
 }
