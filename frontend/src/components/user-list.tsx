@@ -59,7 +59,16 @@ export function UserList() {
             <TableCell>{user.id}</TableCell>
             <TableCell>{user.name}</TableCell>
             <TableCell>{user.email}</TableCell>
-            <TableCell>{user.createdAt}</TableCell>
+            <TableCell>
+              {user.createdAt &&
+                new Date(user.createdAt).toLocaleString(undefined, {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+            </TableCell>
             <TableCell className="text-right space-x-2">
               <Button variant="outline" size="sm" asChild>
                 <Link to="/users/$id/edit" params={{ id: String(user.id) }}>

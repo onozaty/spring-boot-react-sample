@@ -3,7 +3,7 @@ package com.github.onozaty.sample.domain;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Schema(description = "ユーザー")
 public class User {
@@ -24,10 +24,10 @@ public class User {
   private String email;
 
   @Schema(description = "作成日時", accessMode = Schema.AccessMode.READ_ONLY)
-  private LocalDateTime createdAt;
+  private OffsetDateTime createdAt;
 
   @Schema(description = "更新日時", accessMode = Schema.AccessMode.READ_ONLY)
-  private LocalDateTime updatedAt;
+  private OffsetDateTime updatedAt;
 
   public Long getId() {
     return id;
@@ -53,19 +53,19 @@ public class User {
     this.email = email;
   }
 
-  public LocalDateTime getCreatedAt() {
+  public OffsetDateTime getCreatedAt() {
     return createdAt;
   }
 
-  public void setCreatedAt(LocalDateTime createdAt) {
+  public void setCreatedAt(OffsetDateTime createdAt) {
     this.createdAt = createdAt;
   }
 
-  public LocalDateTime getUpdatedAt() {
+  public OffsetDateTime getUpdatedAt() {
     return updatedAt;
   }
 
-  public void setUpdatedAt(LocalDateTime updatedAt) {
+  public void setUpdatedAt(OffsetDateTime updatedAt) {
     this.updatedAt = updatedAt;
   }
 }
