@@ -1,6 +1,6 @@
 {
   "name": "Spring Boot (Java 25)",
-  "dockerComposeFile": "docker-compose.yaml",
+  "dockerComposeFile": "compose.yaml",
   "service": "app",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "customizations": {
