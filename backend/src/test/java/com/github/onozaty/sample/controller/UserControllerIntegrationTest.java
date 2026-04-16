@@ -275,6 +275,55 @@ class UserControllerIntegrationTest {
     assertThat(fieldErrors(response)).anyMatch(e -> "email".equals(e.get("field")));
   }
 
+  @Test
+  void testCreateWithDuplicateEmail() {
+    // Arrange
+    createUser("User 1", "duplicate@example.com");
+
+    var user = new User();
+    user.setName("User 2");
+    user.setEmail("duplicate@example.com");
+
+    // Act
+    ResponseEntity<Void> response =
+        restClient
+            .post()
+            .uri("/api/users")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(user)
+            .retrieve()
+            .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
+            .toBodilessEntity();
+
+    // Assert
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+  }
+
+  @Test
+  void testUpdateWithDuplicateEmail() {
+    // Arrange
+    createUser("User 1", "existing@example.com");
+    var created = createUser("User 2", "original@example.com");
+
+    var updatedUser = new User();
+    updatedUser.setName("User 2");
+    updatedUser.setEmail("existing@example.com");
+
+    // Act
+    ResponseEntity<Void> response =
+        restClient
+            .put()
+            .uri("/api/users/{id}", created.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(updatedUser)
+            .retrieve()
+            .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
+            .toBodilessEntity();
+
+    // Assert
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+  }
+
   private User createUser(String name, String email) {
     var user = new User();
     user.setName(name);

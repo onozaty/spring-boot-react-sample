@@ -12,8 +12,9 @@ function EditUserPage() {
   const navigate = useNavigate()
 
   const userId = Number(id)
-  const { data: users, isPending, isError } = $api.useQuery('get', '/api/users')
-  const user = users?.find((u) => u.id === userId)
+  const { data: user, isPending, isError } = $api.useQuery('get', '/api/users/{id}', {
+    params: { path: { id: userId } },
+  })
 
   if (isPending)
     return (

@@ -31,13 +31,18 @@ public class UserService {
   }
 
   public User update(Long id, User user) {
-    findById(id); // 存在確認
     user.setId(id);
-    return userMapper.update(user);
+    User updated = userMapper.update(user);
+    if (updated == null) {
+      throw new UserNotFoundException(id);
+    }
+    return updated;
   }
 
   public void delete(Long id) {
-    findById(id); // 存在確認
-    userMapper.delete(id);
+    int deleted = userMapper.delete(id);
+    if (deleted == 0) {
+      throw new UserNotFoundException(id);
+    }
   }
 }

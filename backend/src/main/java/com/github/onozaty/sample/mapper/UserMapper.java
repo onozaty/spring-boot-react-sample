@@ -50,5 +50,5 @@ public interface UserMapper {
       DELETE FROM users
       WHERE id = #{id}
       """)
-  void delete(Long id);
+  int delete(Long id);
 }

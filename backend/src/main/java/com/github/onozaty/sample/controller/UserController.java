@@ -59,7 +59,8 @@ public class UserController {
     @ApiResponse(
         responseCode = "400",
         description = "バリデーションエラー",
-        content = @Content(schema = @Schema(implementation = ValidationProblemDetail.class)))
+        content = @Content(schema = @Schema(implementation = ValidationProblemDetail.class))),
+    @ApiResponse(responseCode = "409", description = "データの整合性制約違反")
   })
   public ResponseEntity<User> create(@Valid @RequestBody User user) {
     User created = userService.create(user);
@@ -79,7 +80,8 @@ public class UserController {
         responseCode = "400",
         description = "バリデーションエラー",
         content = @Content(schema = @Schema(implementation = ValidationProblemDetail.class))),
-    @ApiResponse(responseCode = "404", description = "ユーザーが存在しない")
+    @ApiResponse(responseCode = "404", description = "ユーザーが存在しない"),
+    @ApiResponse(responseCode = "409", description = "データの整合性制約違反")
   })
   public ResponseEntity<User> update(
       @Parameter(description = "ユーザーID", required = true) @PathVariable Long id,
