@@ -1,5 +1,6 @@
 plugins {
     java
+    war
     id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.4.0"
@@ -30,6 +31,28 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     spotbugs("com.github.spotbugs:spotbugs:4.9.8")
+}
+
+val frontendDist = project(":frontend").layout.projectDirectory.dir("dist")
+
+tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+    dependsOn(":frontend:build")
+    from(frontendDist) {
+        into("BOOT-INF/classes/static")
+    }
+}
+
+tasks.named<org.springframework.boot.gradle.tasks.bundling.BootWar>("bootWar") {
+    dependsOn(":frontend:build")
+    from(frontendDist) {
+        into("WEB-INF/classes/static")
+    }
+    setClasspath(classpath!!.filter { file ->
+        val n = file.name
+        !n.startsWith("tomcat-embed-") &&
+            !n.startsWith("spring-boot-starter-tomcat") &&
+            !n.startsWith("spring-boot-tomcat-")
+    })
 }
 
 tasks.withType<Test> {

@@ -107,6 +107,24 @@ pnpm dev
 
 ## ビルド
 
+### 実行可能 JAR / WAR（フロントエンド込み）
+
+```bash
+# JAR
+./gradlew :backend:bootJar
+
+# WAR
+./gradlew :backend:bootWar
+```
+
+フロントエンドのビルド → パッケージングが自動で実行されます。
+生成先: `backend/build/libs/backend-0.0.1-SNAPSHOT.jar` または `.war`
+
+```bash
+# JAR で起動
+java -jar backend/build/libs/backend-0.0.1-SNAPSHOT.jar
+```
+
 ### バックエンド
 
 ```bash
@@ -156,7 +174,6 @@ pnpm generate
 
 ## 今後の実装予定
 
-- フロントエンドを含む形での jar / war 作成
 - フロントエンドのテスト
 - バックエンドのログ出力
 - フロントエンドのバリデーション
