@@ -30,5 +30,11 @@ RUN curl -fsSL https://services.gradle.org/distributions/gradle-${GRADLE_VERSION
    && rm /tmp/gradle.zip \
    && chmod -R o+rx /opt/gradle-${GRADLE_VERSION}
 
+# Playwright (Java版) 用に Chromium と OS 依存ライブラリをインストール
+# Node.js 版の playwright CLI を使って依存解決とバイナリ取得を行う
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+RUN npx playwright@1.52.0 install --with-deps chromium
+
 # aptキャッシュを削除してイメージサイズを抑制
 RUN rm -rf /var/lib/apt/lists/*

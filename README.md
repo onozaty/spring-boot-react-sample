@@ -30,6 +30,7 @@ spring-boot-react-sample/
 | フォーマット     | [Spotless](https://github.com/diffplug/spotless) + [google-java-format](https://github.com/google/google-java-format) |
 | 静的解析         | [SpotBugs](https://spotbugs.github.io/)                                                                               |
 | カバレッジ       | [JaCoCo](https://www.jacoco.org/jacoco/)                                                                              |
+| E2E テスト       | [Playwright](https://playwright.dev/java/) for Java                                                                   |
 | ビルドツール     | [Gradle](https://gradle.org/)                                                                                         |
 
 ### フロントエンド
@@ -145,12 +146,17 @@ java -jar backend/build/libs/backend-0.0.1-SNAPSHOT.jar
 # テスト
 ./gradlew :backend:test
 
+# E2E テスト（Playwright）
+./gradlew :backend:e2eTest
+
 # フォーマット
 ./gradlew :backend:spotlessApply
 
 # 静的解析
 ./gradlew :backend:spotbugsMain :backend:spotbugsTest
 ```
+
+E2E テストはフロントエンドのビルド（`frontend/dist/`）を必要とします。初回および frontend 変更後は自動でビルドが実行されます。
 
 ### フロントエンド
 
@@ -185,6 +191,5 @@ pnpm generate
 
 ## 今後の実装予定
 
-- フロントエンドのテスト
 - バックエンドのログ出力
 - フロントエンドのバリデーション

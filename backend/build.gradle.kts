@@ -29,6 +29,8 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("com.microsoft.playwright:playwright:1.52.0")
+    testRuntimeOnly("com.microsoft.playwright:driver-bundle:1.52.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     spotbugs("com.github.spotbugs:spotbugs:4.9.8")
 }
@@ -55,12 +57,48 @@ tasks.named<org.springframework.boot.gradle.tasks.bundling.BootWar>("bootWar") {
     })
 }
 
+// @SpringBootTest では bootJar/bootWar と異なりクラスパスを直接参照するため、
+// frontend/dist/ を build/e2e-resources/static/ にコピーしてクラスパスに追加することで
+// SpaForwardingConfig の ClassPathResource("static/") から配信できるようにしている
+val e2eResourcesDir = layout.buildDirectory.dir("e2e-resources")
+
+val copyFrontendForE2E = tasks.register<Copy>("copyFrontendForE2E") {
+    dependsOn(":frontend:build")
+    from(frontendDist)
+    into(e2eResourcesDir.map { it.dir("static") })
+}
+
+val e2eTest = tasks.register<Test>("e2eTest") {
+    description = "Run Playwright E2E tests"
+    group = "verification"
+    dependsOn(copyFrontendForE2E)
+    useJUnitPlatform()
+    include("**/e2e/**")
+    testLogging {
+        events("passed", "failed", "skipped")
+    }
+    // testClassesDirs と classpath を明示しないと NO-SOURCE になる
+    // (tasks.register<Test> で新規作成したタスクはデフォルト値が設定されないため)
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = files(e2eResourcesDir) + sourceSets["test"].runtimeClasspath
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
     testLogging {
         events("passed", "failed", "skipped")
     }
-    finalizedBy(tasks.jacocoTestReport)
+    // e2eTest は JaCoCo 対象外とする
+    // finalizedBy に jacocoTestReport を含めると dependsOn(tasks.test) が引き込まれ
+    // e2eTest 実行時に test タスクも実行されてしまうため除外している
+    if (name != "e2eTest") {
+        finalizedBy(tasks.jacocoTestReport)
+    }
+}
+
+// e2e パッケージは e2eTest タスクでのみ実行する
+tasks.test {
+    exclude("**/e2e/**")
 }
 
 tasks.jacocoTestReport {

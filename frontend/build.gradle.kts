@@ -17,7 +17,8 @@ val packageJson = JsonSlurper().parse(file("package.json")) as Map<*, *>
 val scripts = packageJson["scripts"] as Map<*, *>
 
 scripts.keys.forEach { scriptName ->
-    tasks.register<com.github.gradle.node.pnpm.task.PnpmTask>(scriptName.toString()) {
+    val taskName = scriptName.toString().replace(":", "_")
+    tasks.register<com.github.gradle.node.pnpm.task.PnpmTask>(taskName) {
         group = "pnpm scripts"
         description = "pnpm run $scriptName"
         args = listOf("run", scriptName.toString())
