@@ -81,7 +81,18 @@ VS Code でリポジトリを開き、コマンドパレットから **Dev Conta
 
 ### 3. フロントエンドの起動
 
-初回はバックエンドを起動した状態で API クライアントを生成します。
+初回はパッケージのインストールが必要です。
+
+```bash
+# Gradle から実行する場合
+./gradlew :frontend:pnpmInstall
+
+# pnpm から直接実行する場合
+cd frontend
+pnpm install
+```
+
+続いて、バックエンドを起動した状態で API クライアントを生成します。
 
 ```bash
 # Gradle から実行する場合

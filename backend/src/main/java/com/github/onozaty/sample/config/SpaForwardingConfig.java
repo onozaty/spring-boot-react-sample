@@ -16,7 +16,14 @@ public class SpaForwardingConfig {
   RouterFunction<ServerResponse> spaRouter() {
     var index = new ClassPathResource("static/index.html");
     var staticResources = new ClassPathResource("static/");
-    var spaPredicate = path("/api/**").or(path("/error")).negate();
+    var spaPredicate =
+        path("/api/**") // REST API
+            .or(path("/error")) // Spring のエラーハンドリング
+            .or(path("/swagger-ui.html")) // springdoc: SwaggerWelcomeWebMvc (リダイレクト元)
+            .or(path("/swagger-ui/**")) // springdoc: SwaggerWelcomeWebMvc (リダイレクト先)
+            .or(path("/v3/api-docs/**")) // springdoc: AbstractOpenApiResource
+            .or(path("/webjars/**")) // springdoc: Swagger UI の静的リソース (SwaggerWebMvcConfigurer)
+            .negate();
     return route().resources("/**", staticResources).resource(spaPredicate, index).build();
   }
 }
