@@ -2,7 +2,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { resolve } from 'path'
 import react from '@vitejs/plugin-react'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   plugins: [
@@ -13,6 +13,15 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+    },
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    css: true,
+    coverage: {
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/generated/**', 'src/test/**', 'src/routeTree.gen.ts', 'src/main.tsx'],
     },
   },
   server: {

@@ -11,7 +11,8 @@
         "vmware.vscode-boot-dev-pack",
         "josevseb.google-java-format-for-vs-code",
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "vitest.explorer"
       ]
     }
   },

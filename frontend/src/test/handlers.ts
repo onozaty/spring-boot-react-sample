@@ -1,0 +1,65 @@
+import { http, HttpResponse } from 'msw'
+import type { components } from '@/generated/api'
+
+type User = components['schemas']['User']
+
+export const mockUsers: User[] = [
+  {
+    id: 1,
+    name: '山田太郎',
+    email: 'yamada@example.com',
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: '2026-01-01T00:00:00Z',
+  },
+  {
+    id: 2,
+    name: '鈴木花子',
+    email: 'suzuki@example.com',
+    createdAt: '2026-01-02T00:00:00Z',
+    updatedAt: '2026-01-02T00:00:00Z',
+  },
+]
+
+export const handlers = [
+  // :id ありのルートを先に登録
+  http.get('*/api/users/:id', ({ params }) => {
+    const user = mockUsers.find((u) => u.id === Number(params.id))
+    if (!user) {
+      return new HttpResponse(null, { status: 404 })
+    }
+    return HttpResponse.json(user)
+  }),
+
+  http.get('*/api/users', () => {
+    return HttpResponse.json(mockUsers)
+  }),
+
+  http.post('*/api/users', async ({ request }) => {
+    const body = (await request.json()) as { name: string; email: string }
+    const newUser: User = {
+      id: 3,
+      name: body.name,
+      email: body.email,
+      createdAt: '2026-01-03T00:00:00Z',
+      updatedAt: '2026-01-03T00:00:00Z',
+    }
+    return HttpResponse.json(newUser, { status: 201 })
+  }),
+
+  http.put('*/api/users/:id', async ({ params, request }) => {
+    const body = (await request.json()) as { name: string; email: string }
+    const user = mockUsers.find((u) => u.id === Number(params.id))
+    if (!user) {
+      return new HttpResponse(null, { status: 404 })
+    }
+    return HttpResponse.json({ ...user, ...body })
+  }),
+
+  http.delete('*/api/users/:id', ({ params }) => {
+    const user = mockUsers.find((u) => u.id === Number(params.id))
+    if (!user) {
+      return new HttpResponse(null, { status: 404 })
+    }
+    return new HttpResponse(null, { status: 204 })
+  }),
+]
