@@ -102,7 +102,7 @@ class UserE2ETest {
     page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("作成")).click();
 
     // Assert
-    assertThat(page.getByText("ユーザーを作成しました")).isVisible();
+    assertThat(page.getByText("ユーザーを作成しました。")).isVisible();
     assertThat(page.getByRole(AriaRole.CELL, new Page.GetByRoleOptions().setName("テストユーザー")))
         .isVisible();
   }
@@ -120,7 +120,7 @@ class UserE2ETest {
     page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("作成")).click();
 
     // Assert
-    assertThat(page.getByText("ユーザーの作成に失敗しました")).isVisible();
+    assertThat(page.getByText("このメールアドレスはすでに使用されています。")).isVisible();
   }
 
   @Test
@@ -158,7 +158,7 @@ class UserE2ETest {
     page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("更新")).click();
 
     // Assert
-    assertThat(page.getByText("ユーザーを更新しました")).isVisible();
+    assertThat(page.getByText("ユーザーを更新しました。")).isVisible();
     assertThat(page.getByRole(AriaRole.CELL, new Page.GetByRoleOptions().setName("編集後ユーザー")))
         .isVisible();
     assertThat(
@@ -221,7 +221,7 @@ class UserE2ETest {
         .click();
 
     // Assert
-    assertThat(page.getByText("ユーザーを削除しました")).isVisible();
+    assertThat(page.getByText("ユーザーを削除しました。")).isVisible();
     assertThat(page.getByRole(AriaRole.CELL, new Page.GetByRoleOptions().setName("削除完了ユーザー")))
         .not()
         .isVisible();

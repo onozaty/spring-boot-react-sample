@@ -33,6 +33,38 @@ describe('UserForm', () => {
       })
     })
 
+    it('メールアドレス重複エラーが表示される', async () => {
+      // Arrange
+      server.use(
+        http.post('*/api/users', () => {
+          return HttpResponse.json(
+            { title: 'Conflict', status: 409 },
+            { status: 409 },
+          )
+        }),
+      )
+      const user = userEvent.setup()
+      renderRoute({ initialEntries: ['/users/new'] })
+
+      // Act
+      await waitFor(() =>
+        expect(screen.getByLabelText('名前')).toBeInTheDocument(),
+      )
+      await user.type(screen.getByLabelText('名前'), 'テスト')
+      await user.type(
+        screen.getByLabelText('メールアドレス'),
+        'duplicate@example.com',
+      )
+      await user.click(screen.getByRole('button', { name: '作成' }))
+
+      // Assert
+      await waitFor(() => {
+        expect(
+          screen.getByText('このメールアドレスはすでに使用されています。'),
+        ).toBeInTheDocument()
+      })
+    })
+
     it('バリデーションエラーが表示される', async () => {
       // Arrange
       server.use(

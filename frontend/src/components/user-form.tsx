@@ -27,30 +27,38 @@ export function UserForm({ editingUser, onSuccess }: Props) {
 
   const createMutation = $api.useMutation('post', '/api/users', {
     onSuccess: () => {
-      toast.success('ユーザーを作成しました')
+      toast.success('ユーザーを作成しました。')
       invalidateUsers()
     },
     onError: (error) => {
       const errors = extractFieldErrors(error)
       if (errors) {
         setFieldErrors(errors)
+      } else if (isConflictError(error)) {
+        setFieldErrors({
+          email: 'このメールアドレスはすでに使用されています。',
+        })
       } else {
-        toast.error('ユーザーの作成に失敗しました')
+        toast.error('ユーザーの作成に失敗しました。')
       }
     },
   })
 
   const updateMutation = $api.useMutation('put', '/api/users/{id}', {
     onSuccess: () => {
-      toast.success('ユーザーを更新しました')
+      toast.success('ユーザーを更新しました。')
       invalidateUsers()
     },
     onError: (error) => {
       const errors = extractFieldErrors(error)
       if (errors) {
         setFieldErrors(errors)
+      } else if (isConflictError(error)) {
+        setFieldErrors({
+          email: 'このメールアドレスはすでに使用されています。',
+        })
       } else {
-        toast.error('ユーザーの更新に失敗しました')
+        toast.error('ユーザーの更新に失敗しました。')
       }
     },
   })
@@ -98,10 +106,21 @@ export function UserForm({ editingUser, onSuccess }: Props) {
           )}
         </div>
       </div>
-      <Button type="submit" disabled={isPending}>
-        {editingUser ? '更新' : '作成'}
-      </Button>
+      <div className="flex justify-end">
+        <Button type="submit" disabled={isPending}>
+          {editingUser ? '更新' : '作成'}
+        </Button>
+      </div>
     </form>
+  )
+}
+
+function isConflictError(error: unknown): boolean {
+  return (
+    error !== null &&
+    typeof error === 'object' &&
+    'status' in error &&
+    (error as { status: unknown }).status === 409
   )
 }
 

@@ -188,8 +188,3 @@ pnpm generate
 ```
 
 生成されたファイルは `frontend/src/generated/api.d.ts` に出力されます。
-
-## 今後の実装予定
-
-- バックエンドのログ出力
-- フロントエンドのバリデーション

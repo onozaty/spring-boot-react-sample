@@ -34,10 +34,10 @@ export function UserList() {
   const deleteMutation = $api.useMutation('delete', '/api/users/{id}', {
     onSuccess: () => {
       queryClient.invalidateQueries($api.queryOptions('get', '/api/users'))
-      toast.success('ユーザーを削除しました')
+      toast.success('ユーザーを削除しました。')
     },
     onError: () => {
-      toast.error('ユーザーの削除に失敗しました')
+      toast.error('ユーザーの削除に失敗しました。')
     },
   })
 
