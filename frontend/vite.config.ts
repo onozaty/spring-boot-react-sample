@@ -21,7 +21,12 @@ export default defineConfig({
     css: true,
     coverage: {
       include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/generated/**', 'src/test/**', 'src/routeTree.gen.ts', 'src/main.tsx'],
+      exclude: [
+        'src/generated/**',
+        'src/test/**',
+        'src/routeTree.gen.ts',
+        'src/main.tsx',
+      ],
     },
   },
   server: {

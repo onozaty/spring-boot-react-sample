@@ -57,7 +57,10 @@ describe('UserForm', () => {
         expect(screen.getByLabelText('名前')).toBeInTheDocument(),
       )
       await user.type(screen.getByLabelText('名前'), 'テスト')
-      await user.type(screen.getByLabelText('メールアドレス'), 'invalid@example')
+      await user.type(
+        screen.getByLabelText('メールアドレス'),
+        'invalid@example',
+      )
       await user.click(screen.getByRole('button', { name: '作成' }))
 
       // Assert

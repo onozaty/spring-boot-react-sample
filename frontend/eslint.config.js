@@ -14,6 +14,8 @@ export default defineConfig([
     'src/generated',
     // TanStack Router が自動生成するルートツリー
     'src/routeTree.gen.ts',
+    // カバレッジレポート
+    'coverage',
   ]),
   {
     files: ['**/*.{ts,tsx}'],

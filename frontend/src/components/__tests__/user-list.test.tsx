@@ -41,9 +41,9 @@ describe('UserList', () => {
     server.use(
       http.get('*/api/users', () => {
         return HttpResponse.json(
-            { title: 'Internal Server Error', status: 500 },
-            { status: 500 },
-          )
+          { title: 'Internal Server Error', status: 500 },
+          { status: 500 },
+        )
       }),
     )
 
@@ -72,9 +72,7 @@ describe('UserList', () => {
 
     // Assert
     await waitFor(() => {
-      expect(
-        screen.getByText('ユーザーを削除しますか？'),
-      ).toBeInTheDocument()
+      expect(screen.getByText('ユーザーを削除しますか？')).toBeInTheDocument()
       expect(
         screen.getByText('山田太郎 を削除します。この操作は取り消せません。'),
       ).toBeInTheDocument()

@@ -12,7 +12,11 @@ function EditUserPage() {
   const navigate = useNavigate()
 
   const userId = Number(id)
-  const { data: user, isPending, isError } = $api.useQuery('get', '/api/users/{id}', {
+  const {
+    data: user,
+    isPending,
+    isError,
+  } = $api.useQuery('get', '/api/users/{id}', {
     params: { path: { id: userId } },
   })
 

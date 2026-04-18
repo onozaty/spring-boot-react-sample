@@ -98,7 +98,9 @@ export function UserList() {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>ユーザーを削除しますか？</AlertDialogTitle>
+                    <AlertDialogTitle>
+                      ユーザーを削除しますか？
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
                       {user.name} を削除します。この操作は取り消せません。
                     </AlertDialogDescription>
