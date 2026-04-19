@@ -1,10 +1,12 @@
 package com.github.onozaty.sample.mapper;
 
 import com.github.onozaty.sample.domain.User;
+import com.github.onozaty.sample.domain.UserInput;
 import java.util.List;
 import java.util.Optional;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 @Mapper
@@ -12,7 +14,7 @@ public interface UserMapper {
 
   @Select(
       """
-      SELECT id, name, email, created_at, updated_at
+      SELECT *
       FROM users
       ORDER BY id
       """)
@@ -20,7 +22,7 @@ public interface UserMapper {
 
   @Select(
       """
-      SELECT id, name, email, created_at, updated_at
+      SELECT *
       FROM users
       WHERE id = #{id}
       """)
@@ -29,21 +31,21 @@ public interface UserMapper {
   @Select(
       """
       INSERT INTO users (name, email, created_at, updated_at)
-      VALUES (#{name}, #{email}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      VALUES (#{input.name}, #{input.email}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *
       """)
-  User insert(User user);
+  User insert(@Param("input") UserInput input);
 
   @Select(
       """
       UPDATE users
-      SET name = #{name},
-          email = #{email},
+      SET name = #{input.name},
+          email = #{input.email},
           updated_at = CURRENT_TIMESTAMP
       WHERE id = #{id}
       RETURNING *
       """)
-  User update(User user);
+  User update(@Param("id") Long id, @Param("input") UserInput input);
 
   @Delete(
       """

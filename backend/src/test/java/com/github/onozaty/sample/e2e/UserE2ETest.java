@@ -4,6 +4,7 @@ import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertTha
 
 import com.github.onozaty.sample.DatabaseResetExtension;
 import com.github.onozaty.sample.domain.User;
+import com.github.onozaty.sample.domain.UserInput;
 import com.github.onozaty.sample.mapper.UserMapper;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.Locator;
@@ -228,9 +229,9 @@ class UserE2ETest {
   }
 
   private User createUser(String name, String email) {
-    var user = new User();
-    user.setName(name);
-    user.setEmail(email);
-    return userMapper.insert(user);
+    var input = new UserInput();
+    input.setName(name);
+    input.setEmail(email);
+    return userMapper.insert(input);
   }
 }

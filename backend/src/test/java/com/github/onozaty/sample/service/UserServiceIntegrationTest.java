@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import com.github.onozaty.sample.DatabaseResetExtension;
 import com.github.onozaty.sample.domain.User;
+import com.github.onozaty.sample.domain.UserInput;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +19,12 @@ class UserServiceIntegrationTest {
   @Test
   void testCreateAndFindById() {
     // Arrange
-    User user = new User();
-    user.setName("Test User");
-    user.setEmail("test@example.com");
+    UserInput input = new UserInput();
+    input.setName("Test User");
+    input.setEmail("test@example.com");
 
     // Act
-    User created = userService.create(user);
+    User created = userService.create(input);
     User found = userService.findById(created.getId());
 
     // Assert
@@ -37,15 +38,15 @@ class UserServiceIntegrationTest {
   @Test
   void testFindAll() {
     // Arrange
-    User user1 = new User();
-    user1.setName("User 1");
-    user1.setEmail("user1@example.com");
-    userService.create(user1);
+    UserInput input1 = new UserInput();
+    input1.setName("User 1");
+    input1.setEmail("user1@example.com");
+    userService.create(input1);
 
-    User user2 = new User();
-    user2.setName("User 2");
-    user2.setEmail("user2@example.com");
-    userService.create(user2);
+    UserInput input2 = new UserInput();
+    input2.setName("User 2");
+    input2.setEmail("user2@example.com");
+    userService.create(input2);
 
     // Act
     var users = userService.findAll();
@@ -57,17 +58,17 @@ class UserServiceIntegrationTest {
   @Test
   void testUpdate() {
     // Arrange
-    User user = new User();
-    user.setName("Original Name");
-    user.setEmail("original@example.com");
-    User created = userService.create(user);
+    UserInput input = new UserInput();
+    input.setName("Original Name");
+    input.setEmail("original@example.com");
+    User created = userService.create(input);
 
-    User updatedUser = new User();
-    updatedUser.setName("Updated Name");
-    updatedUser.setEmail("updated@example.com");
+    UserInput updatedInput = new UserInput();
+    updatedInput.setName("Updated Name");
+    updatedInput.setEmail("updated@example.com");
 
     // Act
-    User result = userService.update(created.getId(), updatedUser);
+    User result = userService.update(created.getId(), updatedInput);
 
     // Assert
     assertThat(result.getId()).isEqualTo(created.getId());
@@ -78,10 +79,10 @@ class UserServiceIntegrationTest {
   @Test
   void testDelete() {
     // Arrange
-    User user = new User();
-    user.setName("To Delete");
-    user.setEmail("delete@example.com");
-    User created = userService.create(user);
+    UserInput input = new UserInput();
+    input.setName("To Delete");
+    input.setEmail("delete@example.com");
+    User created = userService.create(input);
 
     // Act
     userService.delete(created.getId());
@@ -100,12 +101,12 @@ class UserServiceIntegrationTest {
   @Test
   void testUpdateNotFound() {
     // Arrange
-    User user = new User();
-    user.setName("Test");
-    user.setEmail("test@example.com");
+    UserInput input = new UserInput();
+    input.setName("Test");
+    input.setEmail("test@example.com");
 
     // Act & Assert
-    assertThatThrownBy(() -> userService.update(999L, user))
+    assertThatThrownBy(() -> userService.update(999L, input))
         .isInstanceOf(UserNotFoundException.class);
   }
 

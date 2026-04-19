@@ -1,32 +1,27 @@
 package com.github.onozaty.sample.domain;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import java.time.OffsetDateTime;
 
 @Schema(description = "ユーザー")
 public class User {
 
-  @Schema(description = "ユーザーID", accessMode = Schema.AccessMode.READ_ONLY)
+  @Schema(description = "ユーザーID", requiredMode = Schema.RequiredMode.REQUIRED)
   private Long id;
 
-  @NotBlank
   @Schema(description = "名前", requiredMode = Schema.RequiredMode.REQUIRED, example = "山田太郎")
   private String name;
 
-  @NotBlank
-  @Email
   @Schema(
       description = "メールアドレス",
       requiredMode = Schema.RequiredMode.REQUIRED,
       example = "yamada@example.com")
   private String email;
 
-  @Schema(description = "作成日時", accessMode = Schema.AccessMode.READ_ONLY)
+  @Schema(description = "作成日時", requiredMode = Schema.RequiredMode.REQUIRED)
   private OffsetDateTime createdAt;
 
-  @Schema(description = "更新日時", accessMode = Schema.AccessMode.READ_ONLY)
+  @Schema(description = "更新日時", requiredMode = Schema.RequiredMode.REQUIRED)
   private OffsetDateTime updatedAt;
 
   public Long getId() {

@@ -1,6 +1,7 @@
 package com.github.onozaty.sample.controller;
 
 import com.github.onozaty.sample.domain.User;
+import com.github.onozaty.sample.domain.UserInput;
 import com.github.onozaty.sample.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -62,8 +63,8 @@ public class UserController {
         content = @Content(schema = @Schema(implementation = ValidationProblemDetail.class))),
     @ApiResponse(responseCode = "409", description = "データの整合性制約違反")
   })
-  public ResponseEntity<User> create(@Valid @RequestBody User user) {
-    User created = userService.create(user);
+  public ResponseEntity<User> create(@Valid @RequestBody UserInput input) {
+    User created = userService.create(input);
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
@@ -85,8 +86,8 @@ public class UserController {
   })
   public ResponseEntity<User> update(
       @Parameter(description = "ユーザーID", required = true) @PathVariable Long id,
-      @Valid @RequestBody User user) {
-    return ResponseEntity.ok(userService.update(id, user));
+      @Valid @RequestBody UserInput input) {
+    return ResponseEntity.ok(userService.update(id, input));
   }
 
   @DeleteMapping("/{id}")

@@ -1,6 +1,7 @@
 package com.github.onozaty.sample.service;
 
 import com.github.onozaty.sample.domain.User;
+import com.github.onozaty.sample.domain.UserInput;
 import com.github.onozaty.sample.mapper.UserMapper;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -26,13 +27,12 @@ public class UserService {
     return userMapper.findById(id).orElseThrow(() -> new UserNotFoundException(id));
   }
 
-  public User create(User user) {
-    return userMapper.insert(user);
+  public User create(UserInput input) {
+    return userMapper.insert(input);
   }
 
-  public User update(Long id, User user) {
-    user.setId(id);
-    User updated = userMapper.update(user);
+  public User update(Long id, UserInput input) {
+    User updated = userMapper.update(id, input);
     if (updated == null) {
       throw new UserNotFoundException(id);
     }
