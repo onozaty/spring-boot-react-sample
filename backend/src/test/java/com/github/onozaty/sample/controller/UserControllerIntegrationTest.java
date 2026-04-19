@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import com.github.onozaty.sample.DatabaseResetExtension;
 import com.github.onozaty.sample.domain.User;
+import com.github.onozaty.sample.domain.UserInput;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
 
@@ -37,9 +39,7 @@ class UserControllerIntegrationTest {
   @Test
   void testCreate() {
     // Arrange
-    var user = new User();
-    user.setName("Test User");
-    user.setEmail("test@example.com");
+    var input = userInput("Test User", "test@example.com");
 
     // Act
     ResponseEntity<User> response =
@@ -47,17 +47,21 @@ class UserControllerIntegrationTest {
             .post()
             .uri("/api/users")
             .contentType(MediaType.APPLICATION_JSON)
-            .body(user)
+            .body(input)
             .retrieve()
             .toEntity(User.class);
 
     // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-    assertThat(response.getHeaders().getLocation()).isNotNull();
     var created = response.getBody();
     assertThat(created.getId()).isNotNull();
     assertThat(created.getName()).isEqualTo("Test User");
     assertThat(created.getEmail()).isEqualTo("test@example.com");
+    assertThat(created.getCreatedAt()).isNotNull();
+    assertThat(created.getUpdatedAt()).isNotNull();
+    assertThat(response.getHeaders().getLocation()).isNotNull();
+    assertThat(response.getHeaders().getLocation().toString())
+        .endsWith("/api/users/" + created.getId());
   }
 
   @Test
@@ -72,7 +76,12 @@ class UserControllerIntegrationTest {
 
     // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    assertThat(response.getBody()).hasSize(2);
+    var users = response.getBody();
+    assertThat(users).hasSize(2);
+    assertThat(users[0].getName()).isEqualTo("User 1");
+    assertThat(users[0].getEmail()).isEqualTo("user1@example.com");
+    assertThat(users[1].getName()).isEqualTo("User 2");
+    assertThat(users[1].getEmail()).isEqualTo("user2@example.com");
   }
 
   @Test
@@ -86,12 +95,16 @@ class UserControllerIntegrationTest {
 
     // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    assertThat(response.getBody().getName()).isEqualTo("Test User");
+    var found = response.getBody();
+    assertThat(found.getId()).isEqualTo(created.getId());
+    assertThat(found.getName()).isEqualTo("Test User");
+    assertThat(found.getEmail()).isEqualTo("test@example.com");
   }
 
   @Test
   void testFindByIdNotFound() {
-    // Act
+    // handleUserNotFound はボディ無しで 404 を返す仕様
+    // Act & Assert
     ResponseEntity<Void> response =
         restClient
             .get()
@@ -99,8 +112,6 @@ class UserControllerIntegrationTest {
             .retrieve()
             .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
             .toBodilessEntity();
-
-    // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
   }
 
@@ -108,10 +119,7 @@ class UserControllerIntegrationTest {
   void testUpdate() {
     // Arrange
     var created = createUser("Original", "original@example.com");
-
-    var updatedUser = new User();
-    updatedUser.setName("Updated");
-    updatedUser.setEmail("updated@example.com");
+    var input = userInput("Updated", "updated@example.com");
 
     // Act
     ResponseEntity<User> response =
@@ -119,35 +127,34 @@ class UserControllerIntegrationTest {
             .put()
             .uri("/api/users/{id}", created.getId())
             .contentType(MediaType.APPLICATION_JSON)
-            .body(updatedUser)
+            .body(input)
             .retrieve()
             .toEntity(User.class);
 
     // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    assertThat(response.getBody().getName()).isEqualTo("Updated");
-    assertThat(response.getBody().getEmail()).isEqualTo("updated@example.com");
+    var updated = response.getBody();
+    assertThat(updated.getId()).isEqualTo(created.getId());
+    assertThat(updated.getName()).isEqualTo("Updated");
+    assertThat(updated.getEmail()).isEqualTo("updated@example.com");
+    assertThat(updated.getUpdatedAt()).isNotNull();
   }
 
   @Test
   void testUpdateNotFound() {
     // Arrange
-    var user = new User();
-    user.setName("Test");
-    user.setEmail("test@example.com");
+    var input = userInput("Test", "test@example.com");
 
-    // Act
+    // Act & Assert
     ResponseEntity<Void> response =
         restClient
             .put()
             .uri("/api/users/{id}", 999L)
             .contentType(MediaType.APPLICATION_JSON)
-            .body(user)
+            .body(input)
             .retrieve()
             .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
             .toBodilessEntity();
-
-    // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
   }
 
@@ -174,7 +181,7 @@ class UserControllerIntegrationTest {
 
   @Test
   void testDeleteNotFound() {
-    // Act
+    // Act & Assert
     ResponseEntity<Void> response =
         restClient
             .delete()
@@ -182,121 +189,107 @@ class UserControllerIntegrationTest {
             .retrieve()
             .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
             .toBodilessEntity();
-
-    // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
   }
 
   @Test
   void testCreateWithBlankName() {
     // Arrange
-    var user = new User();
-    user.setName("");
-    user.setEmail("test@example.com");
+    var input = userInput("", "test@example.com");
 
-    // Act & Assert
-    ResponseEntity<Map<String, Object>> response =
-        restClient
-            .post()
-            .uri("/api/users")
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(user)
-            .retrieve()
-            .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
-            .toEntity(PROBLEM_DETAIL_TYPE);
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    assertThat(fieldErrors(response)).anyMatch(e -> "name".equals(e.get("field")));
+    // Act
+    ResponseEntity<Map<String, Object>> response = postExpectingError("/api/users", input);
+
+    // Assert
+    assertValidationProblem(response, "/api/users");
+    assertThat(fieldErrors(response))
+        .anyMatch(e -> "name".equals(e.get("field")) && hasNonBlankMessage(e));
   }
 
   @Test
   void testCreateWithInvalidEmail() {
     // Arrange
-    var user = new User();
-    user.setName("Test User");
-    user.setEmail("not-an-email");
+    var input = userInput("Test User", "not-an-email");
 
-    // Act & Assert
-    ResponseEntity<Map<String, Object>> response =
-        restClient
-            .post()
-            .uri("/api/users")
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(user)
-            .retrieve()
-            .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
-            .toEntity(PROBLEM_DETAIL_TYPE);
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    assertThat(fieldErrors(response)).anyMatch(e -> "email".equals(e.get("field")));
+    // Act
+    ResponseEntity<Map<String, Object>> response = postExpectingError("/api/users", input);
+
+    // Assert
+    assertValidationProblem(response, "/api/users");
+    assertThat(fieldErrors(response))
+        .anyMatch(e -> "email".equals(e.get("field")) && hasNonBlankMessage(e));
+  }
+
+  @Test
+  void testCreateWithMultipleValidationErrors() {
+    // Arrange — name が空 + email が不正形式
+    var input = userInput("", "not-an-email");
+
+    // Act
+    ResponseEntity<Map<String, Object>> response = postExpectingError("/api/users", input);
+
+    // Assert
+    assertValidationProblem(response, "/api/users");
+    var errors = fieldErrors(response);
+    assertThat(errors).anyMatch(e -> "name".equals(e.get("field")) && hasNonBlankMessage(e));
+    assertThat(errors).anyMatch(e -> "email".equals(e.get("field")) && hasNonBlankMessage(e));
   }
 
   @Test
   void testUpdateWithBlankName() {
     // Arrange
     var created = createUser("Original", "original@example.com");
+    var input = userInput("", "updated@example.com");
 
-    var updatedUser = new User();
-    updatedUser.setName("");
-    updatedUser.setEmail("updated@example.com");
-
-    // Act & Assert
+    // Act
     ResponseEntity<Map<String, Object>> response =
-        restClient
-            .put()
-            .uri("/api/users/{id}", created.getId())
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(updatedUser)
-            .retrieve()
-            .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
-            .toEntity(PROBLEM_DETAIL_TYPE);
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    assertThat(fieldErrors(response)).anyMatch(e -> "name".equals(e.get("field")));
+        putExpectingError("/api/users/{id}", input, created.getId());
+
+    // Assert
+    assertValidationProblem(response, "/api/users/" + created.getId());
+    assertThat(fieldErrors(response))
+        .anyMatch(e -> "name".equals(e.get("field")) && hasNonBlankMessage(e));
   }
 
   @Test
   void testUpdateWithInvalidEmail() {
     // Arrange
     var created = createUser("Original", "original@example.com");
+    var input = userInput("Updated", "not-an-email");
 
-    var updatedUser = new User();
-    updatedUser.setName("Updated");
-    updatedUser.setEmail("not-an-email");
-
-    // Act & Assert
+    // Act
     ResponseEntity<Map<String, Object>> response =
-        restClient
-            .put()
-            .uri("/api/users/{id}", created.getId())
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(updatedUser)
-            .retrieve()
-            .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
-            .toEntity(PROBLEM_DETAIL_TYPE);
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    assertThat(fieldErrors(response)).anyMatch(e -> "email".equals(e.get("field")));
+        putExpectingError("/api/users/{id}", input, created.getId());
+
+    // Assert
+    assertValidationProblem(response, "/api/users/" + created.getId());
+    assertThat(fieldErrors(response))
+        .anyMatch(e -> "email".equals(e.get("field")) && hasNonBlankMessage(e));
   }
 
   @Test
   void testCreateWithDuplicateEmail() {
     // Arrange
     createUser("User 1", "duplicate@example.com");
-
-    var user = new User();
-    user.setName("User 2");
-    user.setEmail("duplicate@example.com");
+    var input = userInput("User 2", "duplicate@example.com");
 
     // Act
-    ResponseEntity<Void> response =
+    ResponseEntity<ProblemDetail> response =
         restClient
             .post()
             .uri("/api/users")
             .contentType(MediaType.APPLICATION_JSON)
-            .body(user)
+            .body(input)
             .retrieve()
             .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
-            .toBodilessEntity();
+            .toEntity(ProblemDetail.class);
 
     // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+    var problem = response.getBody();
+    assertThat(problem.getTitle()).isEqualTo("Conflict");
+    assertThat(problem.getStatus()).isEqualTo(409);
+    assertThat(problem.getDetail()).isEqualTo("データの整合性制約に違反しています。");
   }
 
   @Test
@@ -304,37 +297,80 @@ class UserControllerIntegrationTest {
     // Arrange
     createUser("User 1", "existing@example.com");
     var created = createUser("User 2", "original@example.com");
-
-    var updatedUser = new User();
-    updatedUser.setName("User 2");
-    updatedUser.setEmail("existing@example.com");
+    var input = userInput("User 2", "existing@example.com");
 
     // Act
-    ResponseEntity<Void> response =
+    ResponseEntity<ProblemDetail> response =
         restClient
             .put()
             .uri("/api/users/{id}", created.getId())
             .contentType(MediaType.APPLICATION_JSON)
-            .body(updatedUser)
+            .body(input)
             .retrieve()
             .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
-            .toBodilessEntity();
+            .toEntity(ProblemDetail.class);
 
     // Assert
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+    var problem = response.getBody();
+    assertThat(problem.getTitle()).isEqualTo("Conflict");
+    assertThat(problem.getStatus()).isEqualTo(409);
+    assertThat(problem.getDetail()).isEqualTo("データの整合性制約に違反しています。");
+  }
+
+  private static UserInput userInput(String name, String email) {
+    var input = new UserInput();
+    input.setName(name);
+    input.setEmail(email);
+    return input;
   }
 
   private User createUser(String name, String email) {
-    var user = new User();
-    user.setName(name);
-    user.setEmail(email);
     return restClient
         .post()
         .uri("/api/users")
         .contentType(MediaType.APPLICATION_JSON)
-        .body(user)
+        .body(userInput(name, email))
         .retrieve()
         .body(User.class);
+  }
+
+  private ResponseEntity<Map<String, Object>> postExpectingError(String uri, UserInput input) {
+    return restClient
+        .post()
+        .uri(uri)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(input)
+        .retrieve()
+        .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
+        .toEntity(PROBLEM_DETAIL_TYPE);
+  }
+
+  private ResponseEntity<Map<String, Object>> putExpectingError(
+      String uri, UserInput input, Object... uriVars) {
+    return restClient
+        .put()
+        .uri(uri, uriVars)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(input)
+        .retrieve()
+        .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
+        .toEntity(PROBLEM_DETAIL_TYPE);
+  }
+
+  private static void assertValidationProblem(
+      ResponseEntity<Map<String, Object>> response, String expectedInstance) {
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    var body = response.getBody();
+    assertThat(body).isNotNull();
+    assertThat(body.get("title")).isEqualTo("Bad Request");
+    assertThat(body.get("status")).isEqualTo(400);
+    assertThat(body.get("instance")).isEqualTo(expectedInstance);
+  }
+
+  private static boolean hasNonBlankMessage(Map<String, String> error) {
+    var message = error.get("message");
+    return message != null && !message.isBlank();
   }
 
   @SuppressWarnings("unchecked")

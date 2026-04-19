@@ -27,10 +27,13 @@ describe('UserForm', () => {
       )
       await user.click(screen.getByRole('button', { name: '作成' }))
 
-      // Assert — 成功後にユーザー一覧に遷移する
+      // Assert — 成功後にユーザー一覧に遷移し、成功 toast が表示される
       await waitFor(() => {
         expect(screen.getByText('ユーザー管理')).toBeInTheDocument()
       })
+      expect(
+        await screen.findByText('ユーザーを作成しました。'),
+      ).toBeInTheDocument()
     })
 
     it('メールアドレス重複エラーが表示される', async () => {
@@ -102,6 +105,76 @@ describe('UserForm', () => {
         ).toBeInTheDocument()
       })
     })
+
+    it('複数フィールドのバリデーションエラーが同時に表示される', async () => {
+      // Arrange
+      server.use(
+        http.post('*/api/users', () => {
+          return HttpResponse.json(
+            {
+              title: 'Bad Request',
+              status: 400,
+              errors: [
+                { field: 'name', message: '名前は必須です' },
+                { field: 'email', message: 'メールアドレスの形式が不正です' },
+              ],
+            },
+            { status: 400 },
+          )
+        }),
+      )
+      const user = userEvent.setup()
+      renderRoute({ initialEntries: ['/users/new'] })
+
+      // Act
+      await waitFor(() =>
+        expect(screen.getByLabelText('名前')).toBeInTheDocument(),
+      )
+      await user.type(screen.getByLabelText('名前'), 'x')
+      await user.type(
+        screen.getByLabelText('メールアドレス'),
+        'invalid@example',
+      )
+      await user.click(screen.getByRole('button', { name: '作成' }))
+
+      // Assert
+      await waitFor(() => {
+        expect(screen.getByText('名前は必須です')).toBeInTheDocument()
+        expect(
+          screen.getByText('メールアドレスの形式が不正です'),
+        ).toBeInTheDocument()
+      })
+    })
+
+    it('予期せぬエラー時にエラー toast が表示される', async () => {
+      // Arrange
+      server.use(
+        http.post('*/api/users', () => {
+          return HttpResponse.json(
+            { title: 'Internal Server Error', status: 500 },
+            { status: 500 },
+          )
+        }),
+      )
+      const user = userEvent.setup()
+      renderRoute({ initialEntries: ['/users/new'] })
+
+      // Act
+      await waitFor(() =>
+        expect(screen.getByLabelText('名前')).toBeInTheDocument(),
+      )
+      await user.type(screen.getByLabelText('名前'), 'テスト')
+      await user.type(
+        screen.getByLabelText('メールアドレス'),
+        'test@example.com',
+      )
+      await user.click(screen.getByRole('button', { name: '作成' }))
+
+      // Assert
+      expect(
+        await screen.findByText('ユーザーの作成に失敗しました。'),
+      ).toBeInTheDocument()
+    })
   })
 
   describe('編集', () => {
@@ -123,10 +196,40 @@ describe('UserForm', () => {
       await user.type(screen.getByLabelText('名前'), '山田次郎')
       await user.click(screen.getByRole('button', { name: '更新' }))
 
-      // Assert — 成功後にユーザー一覧に遷移する
+      // Assert — 成功後にユーザー一覧に遷移し、成功 toast が表示される
       await waitFor(() => {
         expect(screen.getByText('ユーザー管理')).toBeInTheDocument()
       })
+      expect(
+        await screen.findByText('ユーザーを更新しました。'),
+      ).toBeInTheDocument()
+    })
+
+    it('更新失敗時にエラー toast が表示される', async () => {
+      // Arrange
+      server.use(
+        http.put('*/api/users/:id', () => {
+          return HttpResponse.json(
+            { title: 'Internal Server Error', status: 500 },
+            { status: 500 },
+          )
+        }),
+      )
+      const user = userEvent.setup()
+      renderRoute({ initialEntries: ['/users/1/edit'] })
+
+      // Act
+      await waitFor(() =>
+        expect(screen.getByLabelText('名前')).toHaveValue('山田太郎'),
+      )
+      await user.clear(screen.getByLabelText('名前'))
+      await user.type(screen.getByLabelText('名前'), '山田次郎')
+      await user.click(screen.getByRole('button', { name: '更新' }))
+
+      // Assert
+      expect(
+        await screen.findByText('ユーザーの更新に失敗しました。'),
+      ).toBeInTheDocument()
     })
   })
 })

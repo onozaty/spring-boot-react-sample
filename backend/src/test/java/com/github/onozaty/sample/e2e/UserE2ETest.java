@@ -12,6 +12,7 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.AriaRole;
 import java.util.regex.Pattern;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -106,6 +107,10 @@ class UserE2ETest {
     assertThat(page.getByText("ユーザーを作成しました。")).isVisible();
     assertThat(page.getByRole(AriaRole.CELL, new Page.GetByRoleOptions().setName("テストユーザー")))
         .isVisible();
+    var users = userMapper.findAll();
+    Assertions.assertThat(users).hasSize(1);
+    Assertions.assertThat(users.get(0).getName()).isEqualTo("テストユーザー");
+    Assertions.assertThat(users.get(0).getEmail()).isEqualTo("test@example.com");
   }
 
   @Test
@@ -165,6 +170,10 @@ class UserE2ETest {
     assertThat(
             page.getByRole(AriaRole.CELL, new Page.GetByRoleOptions().setName("after@example.com")))
         .isVisible();
+    var users = userMapper.findAll();
+    Assertions.assertThat(users).hasSize(1);
+    Assertions.assertThat(users.get(0).getName()).isEqualTo("編集後ユーザー");
+    Assertions.assertThat(users.get(0).getEmail()).isEqualTo("after@example.com");
   }
 
   @Test
@@ -203,6 +212,7 @@ class UserE2ETest {
     assertThat(page.getByRole(AriaRole.ALERTDIALOG)).not().isVisible();
     assertThat(page.getByRole(AriaRole.CELL, new Page.GetByRoleOptions().setName("キャンセルユーザー")))
         .isVisible();
+    Assertions.assertThat(userMapper.findAll()).hasSize(1);
   }
 
   @Test
@@ -226,6 +236,7 @@ class UserE2ETest {
     assertThat(page.getByRole(AriaRole.CELL, new Page.GetByRoleOptions().setName("削除完了ユーザー")))
         .not()
         .isVisible();
+    Assertions.assertThat(userMapper.findAll()).isEmpty();
   }
 
   private User createUser(String name, String email) {
