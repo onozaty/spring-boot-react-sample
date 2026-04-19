@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,6 +26,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<Void> handleUserNotFound(UserNotFoundException e) {
     return ResponseEntity.notFound().build();
+  }
+
+  @ExceptionHandler(AuthenticationException.class)
+  public ResponseEntity<ProblemDetail> handleAuthentication(AuthenticationException e) {
+    logger.info("認証エラーが発生しました。: {}", e.getMessage());
+    ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
+    problemDetail.setTitle("Unauthorized");
+    problemDetail.setDetail("メールアドレスまたはパスワードが正しくありません。");
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problemDetail);
   }
 
   @ExceptionHandler(DataIntegrityViolationException.class)

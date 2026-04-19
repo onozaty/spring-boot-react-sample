@@ -9,11 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsersIndexRouteImport } from './routes/users/index'
 import { Route as UsersNewRouteImport } from './routes/users/new'
+import { Route as AccountPasswordRouteImport } from './routes/account/password'
 import { Route as UsersIdEditRouteImport } from './routes/users/$id.edit'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -29,6 +36,11 @@ const UsersNewRoute = UsersNewRouteImport.update({
   path: '/users/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountPasswordRoute = AccountPasswordRouteImport.update({
+  id: '/account/password',
+  path: '/account/password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UsersIdEditRoute = UsersIdEditRouteImport.update({
   id: '/users/$id/edit',
   path: '/users/$id/edit',
@@ -37,12 +49,16 @@ const UsersIdEditRoute = UsersIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/account/password': typeof AccountPasswordRoute
   '/users/new': typeof UsersNewRoute
   '/users/': typeof UsersIndexRoute
   '/users/$id/edit': typeof UsersIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/account/password': typeof AccountPasswordRoute
   '/users/new': typeof UsersNewRoute
   '/users': typeof UsersIndexRoute
   '/users/$id/edit': typeof UsersIdEditRoute
@@ -50,20 +66,43 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/account/password': typeof AccountPasswordRoute
   '/users/new': typeof UsersNewRoute
   '/users/': typeof UsersIndexRoute
   '/users/$id/edit': typeof UsersIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/users/new' | '/users/' | '/users/$id/edit'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/account/password'
+    | '/users/new'
+    | '/users/'
+    | '/users/$id/edit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/users/new' | '/users' | '/users/$id/edit'
-  id: '__root__' | '/' | '/users/new' | '/users/' | '/users/$id/edit'
+  to:
+    | '/'
+    | '/login'
+    | '/account/password'
+    | '/users/new'
+    | '/users'
+    | '/users/$id/edit'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/account/password'
+    | '/users/new'
+    | '/users/'
+    | '/users/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
+  AccountPasswordRoute: typeof AccountPasswordRoute
   UsersNewRoute: typeof UsersNewRoute
   UsersIndexRoute: typeof UsersIndexRoute
   UsersIdEditRoute: typeof UsersIdEditRoute
@@ -71,6 +110,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -92,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsersNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account/password': {
+      id: '/account/password'
+      path: '/account/password'
+      fullPath: '/account/password'
+      preLoaderRoute: typeof AccountPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/users/$id/edit': {
       id: '/users/$id/edit'
       path: '/users/$id/edit'
@@ -104,6 +157,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
+  AccountPasswordRoute: AccountPasswordRoute,
   UsersNewRoute: UsersNewRoute,
   UsersIndexRoute: UsersIndexRoute,
   UsersIdEditRoute: UsersIdEditRoute,

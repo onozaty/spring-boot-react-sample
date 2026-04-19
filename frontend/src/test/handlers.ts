@@ -20,7 +20,19 @@ export const mockUsers: User[] = [
   },
 ]
 
+export const mockAuthUser: User = {
+  id: 99,
+  name: 'admin',
+  email: 'admin@example.com',
+  createdAt: '2026-01-01T00:00:00Z',
+  updatedAt: '2026-01-01T00:00:00Z',
+}
+
 export const handlers = [
+  http.get('*/api/auth/me', () => {
+    return HttpResponse.json(mockAuthUser)
+  }),
+
   // :id ありのルートを先に登録
   http.get('*/api/users/:id', ({ params }) => {
     const user = mockUsers.find((u) => u.id === Number(params.id))

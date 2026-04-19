@@ -18,6 +18,7 @@ export function UserForm({ editingUser, onSuccess }: Props) {
   const queryClient = useQueryClient()
   const [name, setName] = useState(editingUser?.name ?? '')
   const [email, setEmail] = useState(editingUser?.email ?? '')
+  const [password, setPassword] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const invalidateUsers = () => {
@@ -64,11 +65,13 @@ export function UserForm({ editingUser, onSuccess }: Props) {
     e.preventDefault()
     if (isPending) return
     setFieldErrors({})
-    const body = { name, email }
     if (editingUser?.id !== undefined) {
-      updateMutation.mutate({ params: { path: { id: editingUser.id } }, body })
+      updateMutation.mutate({
+        params: { path: { id: editingUser.id } },
+        body: { name, email },
+      })
     } else {
-      createMutation.mutate({ body })
+      createMutation.mutate({ body: { name, email, password } })
     }
   }
 
@@ -101,6 +104,22 @@ export function UserForm({ editingUser, onSuccess }: Props) {
           )}
         </div>
       </div>
+      {!editingUser && (
+        <div className="space-y-2">
+          <Label htmlFor="password">パスワード</Label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
+          />
+          {fieldErrors.password && (
+            <p className="text-destructive text-sm">{fieldErrors.password}</p>
+          )}
+        </div>
+      )}
       <div className="flex justify-end">
         <Button type="submit" disabled={isPending}>
           {editingUser ? '更新' : '作成'}

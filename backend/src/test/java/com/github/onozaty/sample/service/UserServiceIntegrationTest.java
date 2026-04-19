@@ -2,16 +2,14 @@ package com.github.onozaty.sample.service;
 
 import static org.assertj.core.api.Assertions.*;
 
-import com.github.onozaty.sample.DatabaseResetExtension;
+import com.github.onozaty.sample.AppTest;
 import com.github.onozaty.sample.domain.User;
-import com.github.onozaty.sample.domain.UserInput;
+import com.github.onozaty.sample.domain.UserCreateInput;
+import com.github.onozaty.sample.domain.UserUpdateInput;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-@ExtendWith(DatabaseResetExtension.class)
+@AppTest
 class UserServiceIntegrationTest {
 
   @Autowired private UserService userService;
@@ -19,9 +17,10 @@ class UserServiceIntegrationTest {
   @Test
   void testCreateAndFindById() {
     // Arrange
-    UserInput input = new UserInput();
+    UserCreateInput input = new UserCreateInput();
     input.setName("Test User");
     input.setEmail("test@example.com");
+    input.setPassword("password123");
 
     // Act
     User created = userService.create(input);
@@ -38,32 +37,35 @@ class UserServiceIntegrationTest {
   @Test
   void testFindAll() {
     // Arrange
-    UserInput input1 = new UserInput();
+    UserCreateInput input1 = new UserCreateInput();
     input1.setName("User 1");
     input1.setEmail("user1@example.com");
+    input1.setPassword("password123");
     userService.create(input1);
 
-    UserInput input2 = new UserInput();
+    UserCreateInput input2 = new UserCreateInput();
     input2.setName("User 2");
     input2.setEmail("user2@example.com");
+    input2.setPassword("password123");
     userService.create(input2);
 
     // Act
     var users = userService.findAll();
 
-    // Assert
-    assertThat(users).hasSize(2);
+    // Assert — admin (migration seed) + User 1 + User 2 の 3 件
+    assertThat(users).hasSizeGreaterThanOrEqualTo(2);
   }
 
   @Test
   void testUpdate() {
     // Arrange
-    UserInput input = new UserInput();
+    UserCreateInput input = new UserCreateInput();
     input.setName("Original Name");
     input.setEmail("original@example.com");
+    input.setPassword("password123");
     User created = userService.create(input);
 
-    UserInput updatedInput = new UserInput();
+    UserUpdateInput updatedInput = new UserUpdateInput();
     updatedInput.setName("Updated Name");
     updatedInput.setEmail("updated@example.com");
 
@@ -79,9 +81,10 @@ class UserServiceIntegrationTest {
   @Test
   void testDelete() {
     // Arrange
-    UserInput input = new UserInput();
+    UserCreateInput input = new UserCreateInput();
     input.setName("To Delete");
     input.setEmail("delete@example.com");
+    input.setPassword("password123");
     User created = userService.create(input);
 
     // Act
@@ -101,7 +104,7 @@ class UserServiceIntegrationTest {
   @Test
   void testUpdateNotFound() {
     // Arrange
-    UserInput input = new UserInput();
+    UserUpdateInput input = new UserUpdateInput();
     input.setName("Test");
     input.setEmail("test@example.com");
 

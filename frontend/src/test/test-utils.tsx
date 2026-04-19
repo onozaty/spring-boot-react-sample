@@ -5,7 +5,9 @@ import {
   RouterProvider,
 } from '@tanstack/react-router'
 import { render, type RenderOptions } from '@testing-library/react'
+import { meQueryOptions } from '@/hooks/use-auth'
 import { routeTree } from '../routeTree.gen'
+import { mockAuthUser } from './handlers'
 
 interface Options extends Omit<RenderOptions, 'wrapper'> {
   initialEntries?: string[]
@@ -18,7 +20,8 @@ export function renderRoute(options: Options = {}) {
     defaultOptions: {
       queries: {
         retry: false,
-        gcTime: 0,
+        gcTime: Infinity,
+        staleTime: Infinity,
       },
       mutations: {
         retry: false,
@@ -26,10 +29,14 @@ export function renderRoute(options: Options = {}) {
     },
   })
 
+  // beforeLoad の /api/auth/me fetch を回避するため認証済み状態を事前にセット
+  queryClient.setQueryData(meQueryOptions.queryKey, mockAuthUser)
+
   const router = createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries }),
     defaultPendingMinMs: 0,
+    context: { queryClient },
   })
 
   const result = render(

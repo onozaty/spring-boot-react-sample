@@ -1,7 +1,12 @@
 # spring-boot-react-sample
 
 Spring Boot と React を組み合わせた Web アプリケーションのサンプルプロジェクトです。
-ユーザー管理機能（一覧・登録・編集・削除）を実装しています。
+以下の機能を実装しています。
+
+- 認証（ログイン / ログアウト / パスワード変更）
+- ユーザー管理（一覧 / 登録 / 編集 / 削除）
+
+認証は JWT を httpOnly + SameSite=Strict な Cookie に格納するステートレス方式です。
 
 ## 構成
 
@@ -116,6 +121,25 @@ pnpm dev
 ```
 
 起動後、http://localhost:5173 でアクセスできます。
+
+### 初期ユーザー
+
+Flyway のマイグレーションで管理ユーザーが登録されています。
+
+| メールアドレス      | パスワード |
+| ------------------- | ---------- |
+| `admin@example.com` | `admin`    |
+
+## 設定
+
+認証関連の設定は [application.properties](backend/src/main/resources/application.properties) で定義しており、環境変数で上書きできます。本番環境では必ず `JWT_SECRET` と `COOKIE_SECURE` を上書きしてください。
+
+| プロパティ                        | 環境変数        | デフォルト | 説明                                                                                  |
+| --------------------------------- | --------------- | ---------- | ------------------------------------------------------------------------------------- |
+| `app.jwt.secret`                  | `JWT_SECRET`    | 開発用の固定値 | JWT 署名鍵（HS256、32 バイト以上）。**本番では必ず上書きすること**                   |
+| `app.jwt.expiration-minutes`      | -               | `480`      | JWT の有効期間（分）                                                                  |
+| `app.jwt.refresh-threshold-minutes` | -             | `240`      | 残り有効期間がこの値を下回ったときに JWT を自動更新する（スライディング更新）         |
+| `app.cookie.secure`               | `COOKIE_SECURE` | `false`    | Cookie の Secure 属性。HTTPS 環境では `true` にすること                              |
 
 ## ビルド
 

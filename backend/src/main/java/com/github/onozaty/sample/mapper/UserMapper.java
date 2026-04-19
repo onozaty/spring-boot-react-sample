@@ -1,7 +1,9 @@
 package com.github.onozaty.sample.mapper;
 
 import com.github.onozaty.sample.domain.User;
-import com.github.onozaty.sample.domain.UserInput;
+import com.github.onozaty.sample.domain.UserCreateInput;
+import com.github.onozaty.sample.domain.UserUpdateInput;
+import com.github.onozaty.sample.domain.UserWithCredential;
 import java.util.List;
 import java.util.Optional;
 import org.apache.ibatis.annotations.Delete;
@@ -34,7 +36,7 @@ public interface UserMapper {
       VALUES (#{input.name}, #{input.email}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       RETURNING *
       """)
-  User insert(@Param("input") UserInput input);
+  User insert(@Param("input") UserCreateInput input);
 
   @Select(
       """
@@ -45,7 +47,7 @@ public interface UserMapper {
       WHERE id = #{id}
       RETURNING *
       """)
-  User update(@Param("id") Long id, @Param("input") UserInput input);
+  User update(@Param("id") Long id, @Param("input") UserUpdateInput input);
 
   @Delete(
       """
@@ -53,4 +55,13 @@ public interface UserMapper {
       WHERE id = #{id}
       """)
   int delete(Long id);
+
+  @Select(
+      """
+      SELECT u.id, u.name, u.email, c.password_hash
+      FROM users u
+      INNER JOIN user_credentials c ON u.id = c.user_id
+      WHERE u.email = #{email}
+      """)
+  Optional<UserWithCredential> findByEmailWithCredential(String email);
 }

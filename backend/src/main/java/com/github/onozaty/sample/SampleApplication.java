@@ -1,11 +1,15 @@
 package com.github.onozaty.sample;
 
+import com.github.onozaty.sample.config.CookieProperties;
+import com.github.onozaty.sample.config.JwtProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 @SpringBootApplication
+@EnableConfigurationProperties({JwtProperties.class, CookieProperties.class})
 public class SampleApplication extends SpringBootServletInitializer {
 
   public static void main(String[] args) {

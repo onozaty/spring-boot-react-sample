@@ -2,9 +2,10 @@ package com.github.onozaty.sample.e2e;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
-import com.github.onozaty.sample.DatabaseResetExtension;
+import com.github.onozaty.sample.AppTest;
 import com.github.onozaty.sample.domain.User;
-import com.github.onozaty.sample.domain.UserInput;
+import com.github.onozaty.sample.domain.UserCreateInput;
+import com.github.onozaty.sample.mapper.UserCredentialMapper;
 import com.github.onozaty.sample.mapper.UserMapper;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.Locator;
@@ -18,19 +19,19 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@ExtendWith(DatabaseResetExtension.class)
+@AppTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class UserE2ETest {
 
   @LocalServerPort private int port;
 
   @Autowired private UserMapper userMapper;
+  @Autowired private UserCredentialMapper credentialMapper;
+  @Autowired private PasswordEncoder passwordEncoder;
 
   private static Playwright playwright;
   private static Browser browser;
@@ -51,6 +52,14 @@ class UserE2ETest {
   @BeforeEach
   void setUp() {
     page = browser.newPage();
+    // ログインページに移動してログイン
+    page.navigate("http://localhost:" + port + "/login");
+    page.getByLabel("メールアドレス").fill("admin@example.com");
+    page.getByLabel("パスワード").fill("admin");
+    page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("ログイン")).click();
+    // ログイン後 /users にリダイレクトされるまで待機
+    page.waitForURL("**/users");
+    // トップページに戻ってからテスト開始
     page.navigate("http://localhost:" + port);
   }
 
@@ -81,7 +90,7 @@ class UserE2ETest {
     // Act
     page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("ユーザー管理")).click();
 
-    // Assert
+    // Assert — admin は常に存在するが、追加した 2 ユーザーが表示される
     assertThat(page.getByRole(AriaRole.CELL, new Page.GetByRoleOptions().setName("山田太郎")))
         .isVisible();
     assertThat(page.getByRole(AriaRole.CELL, new Page.GetByRoleOptions().setName("鈴木花子")))
@@ -101,6 +110,7 @@ class UserE2ETest {
     // Act
     page.getByLabel("名前").fill("テストユーザー");
     page.getByLabel("メールアドレス").fill("test@example.com");
+    page.getByLabel("パスワード").fill("password123");
     page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("作成")).click();
 
     // Assert
@@ -108,9 +118,12 @@ class UserE2ETest {
     assertThat(page.getByRole(AriaRole.CELL, new Page.GetByRoleOptions().setName("テストユーザー")))
         .isVisible();
     var users = userMapper.findAll();
-    Assertions.assertThat(users).hasSize(1);
-    Assertions.assertThat(users.get(0).getName()).isEqualTo("テストユーザー");
-    Assertions.assertThat(users.get(0).getEmail()).isEqualTo("test@example.com");
+    // admin + テストユーザー の 2 件
+    Assertions.assertThat(users).hasSize(2);
+    var testUser =
+        users.stream().filter(u -> "テストユーザー".equals(u.getName())).findFirst().orElseThrow();
+    Assertions.assertThat(testUser.getName()).isEqualTo("テストユーザー");
+    Assertions.assertThat(testUser.getEmail()).isEqualTo("test@example.com");
   }
 
   @Test
@@ -123,6 +136,7 @@ class UserE2ETest {
     // Act
     page.getByLabel("名前").fill("別のユーザー");
     page.getByLabel("メールアドレス").fill("duplicate@example.com");
+    page.getByLabel("パスワード").fill("password123");
     page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("作成")).click();
 
     // Assert
@@ -171,9 +185,10 @@ class UserE2ETest {
             page.getByRole(AriaRole.CELL, new Page.GetByRoleOptions().setName("after@example.com")))
         .isVisible();
     var users = userMapper.findAll();
-    Assertions.assertThat(users).hasSize(1);
-    Assertions.assertThat(users.get(0).getName()).isEqualTo("編集後ユーザー");
-    Assertions.assertThat(users.get(0).getEmail()).isEqualTo("after@example.com");
+    var editedUser =
+        users.stream().filter(u -> "編集後ユーザー".equals(u.getName())).findFirst().orElseThrow();
+    Assertions.assertThat(editedUser.getName()).isEqualTo("編集後ユーザー");
+    Assertions.assertThat(editedUser.getEmail()).isEqualTo("after@example.com");
   }
 
   @Test
@@ -212,7 +227,9 @@ class UserE2ETest {
     assertThat(page.getByRole(AriaRole.ALERTDIALOG)).not().isVisible();
     assertThat(page.getByRole(AriaRole.CELL, new Page.GetByRoleOptions().setName("キャンセルユーザー")))
         .isVisible();
-    Assertions.assertThat(userMapper.findAll()).hasSize(1);
+    Assertions.assertThat(
+            userMapper.findAll().stream().filter(u -> "キャンセルユーザー".equals(u.getName())).count())
+        .isEqualTo(1);
   }
 
   @Test
@@ -236,13 +253,59 @@ class UserE2ETest {
     assertThat(page.getByRole(AriaRole.CELL, new Page.GetByRoleOptions().setName("削除完了ユーザー")))
         .not()
         .isVisible();
-    Assertions.assertThat(userMapper.findAll()).isEmpty();
+    Assertions.assertThat(
+            userMapper.findAll().stream().filter(u -> "削除完了ユーザー".equals(u.getName())).count())
+        .isEqualTo(0);
+  }
+
+  @Test
+  void testUnauthenticatedRedirectsToLogin() {
+    // Arrange — 新規ページ（Cookie なし）で /users にアクセス
+    var newPage = browser.newPage();
+
+    // Act
+    newPage.navigate("http://localhost:" + port + "/users");
+
+    // Assert
+    assertThat(newPage.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("ログイン")))
+        .isVisible();
+    newPage.close();
+  }
+
+  @Test
+  void testChangePassword() {
+    // Arrange
+    page.navigate("http://localhost:" + port + "/users");
+
+    // Act — ヘッダーからパスワード変更画面に遷移
+    page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("パスワード変更")).click();
+    page.getByLabel("現在のパスワード").fill("admin");
+    page.getByLabel("新しいパスワード（8文字以上）").fill("newpassword123");
+    page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("変更する")).click();
+
+    // Assert
+    assertThat(page.getByText("パスワードを変更しました。")).isVisible();
+  }
+
+  @Test
+  void testLogout() {
+    // Arrange
+    page.navigate("http://localhost:" + port + "/users");
+
+    // Act
+    page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("ログアウト")).click();
+
+    // Assert — ログインページに戻る
+    assertThat(page.getByRole(AriaRole.HEADING, new Page.GetByRoleOptions().setName("ログイン")))
+        .isVisible();
   }
 
   private User createUser(String name, String email) {
-    var input = new UserInput();
+    var input = new UserCreateInput();
     input.setName(name);
     input.setEmail(email);
-    return userMapper.insert(input);
+    User created = userMapper.insert(input);
+    credentialMapper.insert(created.getId(), passwordEncoder.encode("password123"));
+    return created;
   }
 }

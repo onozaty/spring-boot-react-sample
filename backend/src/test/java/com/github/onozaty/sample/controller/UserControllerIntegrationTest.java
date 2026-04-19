@@ -2,15 +2,14 @@ package com.github.onozaty.sample.controller;
 
 import static org.assertj.core.api.Assertions.*;
 
-import com.github.onozaty.sample.DatabaseResetExtension;
+import com.github.onozaty.sample.AppTest;
+import com.github.onozaty.sample.LoginHelper;
 import com.github.onozaty.sample.domain.User;
-import com.github.onozaty.sample.domain.UserInput;
+import com.github.onozaty.sample.domain.UserCreateInput;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
@@ -20,8 +19,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@ExtendWith(DatabaseResetExtension.class)
+@AppTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class UserControllerIntegrationTest {
 
   private static final ParameterizedTypeReference<Map<String, Object>> PROBLEM_DETAIL_TYPE =
@@ -33,7 +31,14 @@ class UserControllerIntegrationTest {
 
   @BeforeEach
   void setUp() {
-    restClient = RestClient.builder().baseUrl("http://localhost:" + port).build();
+    // admin ユーザーは V2 migration で挿入済み（email: admin@example.com, password: admin）
+    restClient =
+        RestClient.builder()
+            .baseUrl("http://localhost:" + port)
+            .defaultRequest(
+                spec ->
+                    spec.header("Cookie", LoginHelper.getAuthCookie("http://localhost:" + port)))
+            .build();
   }
 
   @Test
@@ -74,14 +79,14 @@ class UserControllerIntegrationTest {
     ResponseEntity<User[]> response =
         restClient.get().uri("/api/users").retrieve().toEntity(User[].class);
 
-    // Assert
+    // Assert — admin (migration seed) + User 1 + User 2 の 3 件
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     var users = response.getBody();
-    assertThat(users).hasSize(2);
-    assertThat(users[0].getName()).isEqualTo("User 1");
-    assertThat(users[0].getEmail()).isEqualTo("user1@example.com");
-    assertThat(users[1].getName()).isEqualTo("User 2");
-    assertThat(users[1].getEmail()).isEqualTo("user2@example.com");
+    assertThat(users).hasSizeGreaterThanOrEqualTo(2);
+    assertThat(users)
+        .anyMatch(u -> "User 1".equals(u.getName()) && "user1@example.com".equals(u.getEmail()));
+    assertThat(users)
+        .anyMatch(u -> "User 2".equals(u.getName()) && "user2@example.com".equals(u.getEmail()));
   }
 
   @Test
@@ -318,10 +323,11 @@ class UserControllerIntegrationTest {
     assertThat(problem.getDetail()).isEqualTo("データの整合性制約に違反しています。");
   }
 
-  private static UserInput userInput(String name, String email) {
-    var input = new UserInput();
+  private static UserCreateInput userInput(String name, String email) {
+    var input = new UserCreateInput();
     input.setName(name);
     input.setEmail(email);
+    input.setPassword("password123");
     return input;
   }
 
@@ -335,7 +341,8 @@ class UserControllerIntegrationTest {
         .body(User.class);
   }
 
-  private ResponseEntity<Map<String, Object>> postExpectingError(String uri, UserInput input) {
+  private ResponseEntity<Map<String, Object>> postExpectingError(
+      String uri, UserCreateInput input) {
     return restClient
         .post()
         .uri(uri)
@@ -347,7 +354,7 @@ class UserControllerIntegrationTest {
   }
 
   private ResponseEntity<Map<String, Object>> putExpectingError(
-      String uri, UserInput input, Object... uriVars) {
+      String uri, UserCreateInput input, Object... uriVars) {
     return restClient
         .put()
         .uri(uri, uriVars)

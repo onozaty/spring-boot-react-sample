@@ -25,6 +25,7 @@ describe('UserForm', () => {
         screen.getByLabelText('メールアドレス'),
         'test@example.com',
       )
+      await user.type(screen.getByLabelText('パスワード'), 'password123')
       await user.click(screen.getByRole('button', { name: '作成' }))
 
       // Assert — 成功後にユーザー一覧に遷移し、成功 toast が表示される
@@ -58,6 +59,7 @@ describe('UserForm', () => {
         screen.getByLabelText('メールアドレス'),
         'duplicate@example.com',
       )
+      await user.type(screen.getByLabelText('パスワード'), 'password123')
       await user.click(screen.getByRole('button', { name: '作成' }))
 
       // Assert
@@ -96,6 +98,7 @@ describe('UserForm', () => {
         screen.getByLabelText('メールアドレス'),
         'invalid@example',
       )
+      await user.type(screen.getByLabelText('パスワード'), 'password123')
       await user.click(screen.getByRole('button', { name: '作成' }))
 
       // Assert
@@ -135,6 +138,7 @@ describe('UserForm', () => {
         screen.getByLabelText('メールアドレス'),
         'invalid@example',
       )
+      await user.type(screen.getByLabelText('パスワード'), 'password123')
       await user.click(screen.getByRole('button', { name: '作成' }))
 
       // Assert
@@ -168,6 +172,7 @@ describe('UserForm', () => {
         screen.getByLabelText('メールアドレス'),
         'test@example.com',
       )
+      await user.type(screen.getByLabelText('パスワード'), 'password123')
       await user.click(screen.getByRole('button', { name: '作成' }))
 
       // Assert

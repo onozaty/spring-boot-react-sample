@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-@Schema(description = "ユーザー入力")
-public class UserInput {
+@Schema(description = "ユーザー更新入力（パスワード変更は別エンドポイント）")
+public class UserUpdateInput {
 
   @NotBlank
   @Schema(description = "名前", requiredMode = Schema.RequiredMode.REQUIRED, example = "山田太郎")
