@@ -43,6 +43,7 @@ function EditUserPage() {
         <h1 className="text-3xl font-bold">ユーザー編集</h1>
       </div>
       <UserForm
+        key={user.id}
         editingUser={user}
         onSuccess={() => navigate({ to: '/users' })}
       />
