@@ -2,24 +2,30 @@
 
 ## 修正完了時の手順
 
-コードの修正が完了したら、必ず以下を順番に実行すること。
+コードの修正が完了したら、必ず以下を順番に実行すること。backend / frontend の両方をまとめて対象とする集約タスクをルートプロジェクトに登録してある。
 
 ### 1. フォーマット
 
 ```bash
-./gradlew :backend:spotlessApply
+./gradlew format
 ```
 
-### 2. 静的解析
+### 2. 静的解析 (lint / typecheck / SpotBugs)
 
 ```bash
-./gradlew :backend:spotbugsMain :backend:spotbugsTest
+./gradlew lint
 ```
 
 ### 3. テスト
 
 ```bash
-./gradlew :backend:test
+./gradlew test
+```
+
+### 4. E2E テスト (必要に応じて)
+
+```bash
+./gradlew e2eTest
 ```
 
 ## ライブラリ追加時の注意
