@@ -5,7 +5,14 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("com.diffplug.spotless") version "8.4.0"
     id("com.github.spotbugs") version "6.4.12"
+    id("org.flywaydb.flyway") version "11.14.1"
     jacoco
+}
+
+buildscript {
+    dependencies {
+        classpath("org.flywaydb:flyway-database-postgresql:11.14.1")
+    }
 }
 
 group = "com.github.onozaty"
@@ -122,4 +129,18 @@ spotless {
     java {
         googleJavaFormat("1.35.0")
     }
+}
+
+flyway {
+    url = "jdbc:postgresql://localhost:5432/sample"
+    user = "sample"
+    password = "sample"
+    cleanDisabled = false
+}
+
+tasks.register<org.flywaydb.gradle.task.FlywayCleanTask>("flywayCleanTest") {
+    url = "jdbc:postgresql://localhost:5432/sample_test"
+    user = "sample"
+    password = "sample"
+    cleanDisabled = false
 }
