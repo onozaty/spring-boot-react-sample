@@ -3,6 +3,7 @@ package com.github.onozaty.sample.config;
 import static org.springframework.web.servlet.function.RequestPredicates.path;
 import static org.springframework.web.servlet.function.RouterFunctions.route;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnResource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -12,7 +13,9 @@ import org.springframework.web.servlet.function.ServerResponse;
 @Configuration
 public class SpaForwardingConfig {
 
+  // bootRun などフロントエンド未ビルド時は static/index.html が存在しないため SPA ルーティングを登録しない
   @Bean
+  @ConditionalOnResource(resources = "classpath:static/index.html")
   RouterFunction<ServerResponse> spaRouter() {
     var index = new ClassPathResource("static/index.html");
     var staticResources = new ClassPathResource("static/");
