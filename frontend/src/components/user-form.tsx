@@ -25,23 +25,29 @@ export function UserForm({ editingUser, onSuccess }: Props) {
     onSuccess()
   }
 
+  const handleMutationError = (error: unknown) => {
+    const errors = extractFieldErrors(error)
+    if (errors) {
+      setFieldErrors(errors)
+    } else if (isConflictError(error)) {
+      setFieldErrors({
+        email: 'このメールアドレスはすでに使用されています。',
+      })
+    } else {
+      toast.error(
+        editingUser
+          ? 'ユーザーの更新に失敗しました。'
+          : 'ユーザーの作成に失敗しました。',
+      )
+    }
+  }
+
   const createMutation = $api.useMutation('post', '/api/users', {
     onSuccess: () => {
       toast.success('ユーザーを作成しました。')
       invalidateUsers()
     },
-    onError: (error) => {
-      const errors = extractFieldErrors(error)
-      if (errors) {
-        setFieldErrors(errors)
-      } else if (isConflictError(error)) {
-        setFieldErrors({
-          email: 'このメールアドレスはすでに使用されています。',
-        })
-      } else {
-        toast.error('ユーザーの作成に失敗しました。')
-      }
-    },
+    onError: handleMutationError,
   })
 
   const updateMutation = $api.useMutation('put', '/api/users/{id}', {
@@ -49,18 +55,7 @@ export function UserForm({ editingUser, onSuccess }: Props) {
       toast.success('ユーザーを更新しました。')
       invalidateUsers()
     },
-    onError: (error) => {
-      const errors = extractFieldErrors(error)
-      if (errors) {
-        setFieldErrors(errors)
-      } else if (isConflictError(error)) {
-        setFieldErrors({
-          email: 'このメールアドレスはすでに使用されています。',
-        })
-      } else {
-        toast.error('ユーザーの更新に失敗しました。')
-      }
-    },
+    onError: handleMutationError,
   })
 
   const isPending = createMutation.isPending || updateMutation.isPending
