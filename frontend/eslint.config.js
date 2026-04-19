@@ -32,8 +32,7 @@ export default defineConfig([
   },
   {
     // TanStack Router のルートファイルは Route と Component を両方 export する仕様のため除外
-    // banner.tsx は Context・フック・コンポーネントをまとめているため除外
-    files: ['src/routes/**/*.{ts,tsx}', 'src/components/banner.tsx'],
+    files: ['src/routes/**/*.{ts,tsx}'],
     rules: {
       'react-refresh/only-export-components': 'off',
     },
