@@ -65,32 +65,35 @@ class JwtTokenServiceTest {
   }
 
   @Test
-  void testBuildSetCookieHeader() {
+  void testBuildAuthCookie() {
     // Arrange
     var svc = service(480, 240);
     String token = svc.issue(1L, "user@example.com");
 
     // Act
-    String header = svc.buildSetCookieHeader(token);
+    var cookie = svc.buildAuthCookie(token);
 
     // Assert
-    assertThat(header).startsWith("AUTH_TOKEN=");
-    assertThat(header).contains("HttpOnly");
-    assertThat(header).contains("SameSite=Strict");
-    assertThat(header).contains("Path=/");
-    assertThat(header).contains("Max-Age=28800");
+    assertThat(cookie.getName()).isEqualTo("AUTH_TOKEN");
+    assertThat(cookie.getValue()).isEqualTo(token);
+    assertThat(cookie.isHttpOnly()).isTrue();
+    assertThat(cookie.isSecure()).isFalse();
+    assertThat(cookie.getSameSite()).isEqualTo("Strict");
+    assertThat(cookie.getPath()).isEqualTo("/");
+    assertThat(cookie.getMaxAge()).isEqualTo(java.time.Duration.ofMinutes(480));
   }
 
   @Test
-  void testBuildClearCookieHeader() {
+  void testBuildClearAuthCookie() {
     // Arrange
     var svc = service(480, 240);
 
     // Act
-    String header = svc.buildClearCookieHeader();
+    var cookie = svc.buildClearAuthCookie();
 
     // Assert
-    assertThat(header).startsWith("AUTH_TOKEN=;");
-    assertThat(header).contains("Max-Age=0");
+    assertThat(cookie.getName()).isEqualTo("AUTH_TOKEN");
+    assertThat(cookie.getValue()).isEmpty();
+    assertThat(cookie.getMaxAge()).isZero();
   }
 }

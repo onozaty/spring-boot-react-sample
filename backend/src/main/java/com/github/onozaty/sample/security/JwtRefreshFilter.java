@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -35,7 +36,8 @@ public class JwtRefreshFilter extends OncePerRequestFilter {
         Long userId = jwt.getClaim(JwtTokenService.CLAIM_USER_ID);
         String username = jwt.getSubject();
         String newToken = jwtTokenService.issue(userId, username);
-        response.addHeader("Set-Cookie", jwtTokenService.buildSetCookieHeader(newToken));
+        response.addHeader(
+            HttpHeaders.SET_COOKIE, jwtTokenService.buildAuthCookie(newToken).toString());
       }
     }
 

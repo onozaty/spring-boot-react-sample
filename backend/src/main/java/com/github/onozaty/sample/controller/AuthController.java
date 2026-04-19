@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -57,7 +58,9 @@ public class AuthController {
     var user =
         userMapper
             .findByEmailWithCredential(email)
-            .orElseThrow(() -> new IllegalStateException("Authenticated user not found"));
+            .orElseThrow(
+                () ->
+                    new AuthenticationCredentialsNotFoundException("Authenticated user not found"));
 
     String token = jwtTokenService.issue(user.getId(), user.getEmail());
 
@@ -67,7 +70,7 @@ public class AuthController {
     responseUser.setEmail(user.getEmail());
 
     return ResponseEntity.ok()
-        .header(HttpHeaders.SET_COOKIE, jwtTokenService.buildSetCookieHeader(token))
+        .header(HttpHeaders.SET_COOKIE, jwtTokenService.buildAuthCookie(token).toString())
         .body(responseUser);
   }
 
@@ -76,7 +79,7 @@ public class AuthController {
   @ApiResponse(responseCode = "204", description = "ログアウト成功")
   public ResponseEntity<Void> logout() {
     return ResponseEntity.noContent()
-        .header(HttpHeaders.SET_COOKIE, jwtTokenService.buildClearCookieHeader())
+        .header(HttpHeaders.SET_COOKIE, jwtTokenService.buildClearAuthCookie().toString())
         .build();
   }
 
@@ -91,7 +94,9 @@ public class AuthController {
     var user =
         userMapper
             .findById(userId)
-            .orElseThrow(() -> new IllegalStateException("Authenticated user not found"));
+            .orElseThrow(
+                () ->
+                    new AuthenticationCredentialsNotFoundException("Authenticated user not found"));
     return ResponseEntity.ok(user);
   }
 

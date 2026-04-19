@@ -1,6 +1,7 @@
 package com.github.onozaty.sample.service;
 
 import com.github.onozaty.sample.mapper.UserCredentialMapper;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,8 @@ public class AuthService {
     String currentHash =
         credentialMapper
             .findPasswordHashByUserId(userId)
-            .orElseThrow(() -> new BadCredentialsException("Credential not found"));
+            .orElseThrow(
+                () -> new AuthenticationCredentialsNotFoundException("Credential not found"));
 
     if (!passwordEncoder.matches(currentPassword, currentHash)) {
       throw new BadCredentialsException("Current password is incorrect");

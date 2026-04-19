@@ -3,9 +3,11 @@ package com.github.onozaty.sample.service;
 import com.github.onozaty.sample.config.CookieProperties;
 import com.github.onozaty.sample.config.JwtProperties;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import javax.crypto.spec.SecretKeySpec;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -71,32 +73,25 @@ public class JwtTokenService {
     return remainingMinutes < jwtProperties.refreshThresholdMinutes();
   }
 
-  /** Set-Cookie ヘッダ値を組み立てる */
-  public String buildSetCookieHeader(String token) {
-    int maxAgeSeconds = jwtProperties.expirationMinutes() * 60;
-    var sb = new StringBuilder();
-    sb.append(COOKIE_NAME).append("=").append(token);
-    sb.append("; HttpOnly");
-    if (cookieProperties.secure()) {
-      sb.append("; Secure");
-    }
-    sb.append("; SameSite=Strict");
-    sb.append("; Path=/");
-    sb.append("; Max-Age=").append(maxAgeSeconds);
-    return sb.toString();
+  /** 認証 Cookie を組み立てる */
+  public ResponseCookie buildAuthCookie(String token) {
+    return ResponseCookie.from(COOKIE_NAME, token)
+        .httpOnly(true)
+        .secure(cookieProperties.secure())
+        .sameSite("Strict")
+        .path("/")
+        .maxAge(Duration.ofMinutes(jwtProperties.expirationMinutes()))
+        .build();
   }
 
-  /** ログアウト用（Cookie を即時失効させる）Set-Cookie ヘッダ値 */
-  public String buildClearCookieHeader() {
-    var sb = new StringBuilder();
-    sb.append(COOKIE_NAME).append("=");
-    sb.append("; HttpOnly");
-    if (cookieProperties.secure()) {
-      sb.append("; Secure");
-    }
-    sb.append("; SameSite=Strict");
-    sb.append("; Path=/");
-    sb.append("; Max-Age=0");
-    return sb.toString();
+  /** ログアウト用（Cookie を即時失効させる）Cookie を組み立てる */
+  public ResponseCookie buildClearAuthCookie() {
+    return ResponseCookie.from(COOKIE_NAME, "")
+        .httpOnly(true)
+        .secure(cookieProperties.secure())
+        .sameSite("Strict")
+        .path("/")
+        .maxAge(0)
+        .build();
   }
 }

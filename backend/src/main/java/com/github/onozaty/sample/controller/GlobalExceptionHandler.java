@@ -1,5 +1,6 @@
 package com.github.onozaty.sample.controller;
 
+import com.github.onozaty.sample.service.JwtTokenService;
 import com.github.onozaty.sample.service.UserNotFoundException;
 import java.util.List;
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,14 +25,32 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+  private final JwtTokenService jwtTokenService;
+
+  public GlobalExceptionHandler(JwtTokenService jwtTokenService) {
+    this.jwtTokenService = jwtTokenService;
+  }
+
   @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<Void> handleUserNotFound(UserNotFoundException e) {
     return ResponseEntity.notFound().build();
   }
 
+  @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
+  public ResponseEntity<ProblemDetail> handleAuthenticationCredentialsNotFound(
+      AuthenticationCredentialsNotFoundException e) {
+    logger.info("認証情報が失効しています。: {}", e.getMessage());
+    ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
+    problemDetail.setTitle("Unauthorized");
+    problemDetail.setDetail("認証情報が失効しています。再度ログインしてください。");
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .header(HttpHeaders.SET_COOKIE, jwtTokenService.buildClearAuthCookie().toString())
+        .body(problemDetail);
+  }
+
   @ExceptionHandler(AuthenticationException.class)
   public ResponseEntity<ProblemDetail> handleAuthentication(AuthenticationException e) {
-    logger.info("認証エラーが発生しました。: {}", e.getMessage());
+    logger.info("認証に失敗しました。: {}", e.getMessage());
     ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
     problemDetail.setTitle("Unauthorized");
     problemDetail.setDetail("メールアドレスまたはパスワードが正しくありません。");
