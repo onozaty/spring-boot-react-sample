@@ -31,7 +31,7 @@ public class DatabaseResetExtension implements BeforeEachCallback {
           .update();
     }
 
-    // V3 migration で挿入されたシードデータを再投入する
+    // 各テストで使うデフォルトユーザ（admin）を投入する
     jdbcClient
         .sql(
             """
