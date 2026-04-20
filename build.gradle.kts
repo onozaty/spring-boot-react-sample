@@ -35,6 +35,12 @@ tasks.register("format") {
     dependsOn(":backend:spotlessApply", ":frontend:format")
 }
 
+tasks.register("formatCheck") {
+    group = "verification"
+    description = "Check formatting for backend and frontend (without modifying files)"
+    dependsOn(":backend:spotlessCheck", ":frontend:format_check")
+}
+
 tasks.register("e2eTest") {
     group = "verification"
     description = "Run E2E tests"
