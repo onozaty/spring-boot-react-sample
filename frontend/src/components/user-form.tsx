@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 type User = components['schemas']['User']
+type ValidationProblemDetail = components['schemas']['ValidationProblemDetail']
 
 interface Props {
   editingUser: User | null
@@ -140,20 +141,18 @@ function isConflictError(error: unknown): boolean {
 
 function extractFieldErrors(error: unknown): Record<string, string> | null {
   if (
-    error !== null &&
-    typeof error === 'object' &&
-    'errors' in error &&
-    Array.isArray((error as { errors: unknown }).errors)
+    error === null ||
+    typeof error !== 'object' ||
+    !('errors' in error) ||
+    !Array.isArray((error as ValidationProblemDetail).errors)
   ) {
-    const result: Record<string, string> = {}
-    for (const err of (
-      error as { errors: { field?: string; message?: string }[] }
-    ).errors) {
-      if (err.field && err.message) {
-        result[err.field] = err.message
-      }
-    }
-    if (Object.keys(result).length > 0) return result
+    return null
   }
-  return null
+  const result: Record<string, string> = {}
+  for (const err of (error as ValidationProblemDetail).errors ?? []) {
+    if (err.field && err.message) {
+      result[err.field] = err.message
+    }
+  }
+  return Object.keys(result).length > 0 ? result : null
 }
