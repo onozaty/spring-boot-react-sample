@@ -1,5 +1,6 @@
 package com.github.onozaty.sample.controller;
 
+import com.github.onozaty.sample.service.InvalidCurrentPasswordException;
 import com.github.onozaty.sample.service.JwtTokenService;
 import com.github.onozaty.sample.service.UserNotFoundException;
 import java.util.List;
@@ -34,6 +35,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<Void> handleUserNotFound(UserNotFoundException e) {
     return ResponseEntity.notFound().build();
+  }
+
+  @ExceptionHandler(InvalidCurrentPasswordException.class)
+  public ResponseEntity<ProblemDetail> handleInvalidCurrentPassword(
+      InvalidCurrentPasswordException e) {
+    ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+    problemDetail.setTitle("Bad Request");
+    problemDetail.setDetail("現在のパスワードが正しくありません。");
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
   }
 
   @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)

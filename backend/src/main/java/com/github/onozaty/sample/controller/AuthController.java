@@ -104,7 +104,7 @@ public class AuthController {
   @Operation(summary = "パスワード変更", description = "ログイン中ユーザーのパスワードを変更します")
   @ApiResponses({
     @ApiResponse(responseCode = "204", description = "変更成功"),
-    @ApiResponse(responseCode = "400", description = "現在のパスワードが不正")
+    @ApiResponse(responseCode = "400", description = "現在のパスワードが正しくない")
   })
   public ResponseEntity<Void> changePassword(
       @AuthenticationPrincipal Jwt jwt, @Valid @RequestBody PasswordChangeRequest request) {

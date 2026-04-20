@@ -27,7 +27,7 @@ function PasswordChangePage() {
         body: { currentPassword, newPassword },
       })
 
-      if (response.status === 401) {
+      if (response.status === 400) {
         setError('現在のパスワードが正しくありません。')
         return
       }

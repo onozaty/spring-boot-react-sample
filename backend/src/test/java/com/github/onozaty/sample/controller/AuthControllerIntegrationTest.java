@@ -196,7 +196,7 @@ class AuthControllerIntegrationTest {
             .onStatus(status -> status.is4xxClientError(), (req, res) -> {})
             .toBodilessEntity();
 
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
   }
 
   @Test
