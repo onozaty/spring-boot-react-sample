@@ -8,6 +8,7 @@ import com.github.onozaty.sample.domain.UserCreateInput;
 import com.github.onozaty.sample.mapper.UserCredentialMapper;
 import com.github.onozaty.sample.mapper.UserMapper;
 import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
@@ -40,7 +41,8 @@ class UserE2ETest {
   @BeforeAll
   static void launchBrowser() {
     playwright = Playwright.create();
-    browser = playwright.chromium().launch();
+    boolean headless = !"false".equalsIgnoreCase(System.getenv("HEADLESS"));
+    browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(headless));
   }
 
   @AfterAll

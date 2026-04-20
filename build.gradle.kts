@@ -40,3 +40,9 @@ tasks.register("e2eTest") {
     description = "Run E2E tests"
     dependsOn(":backend:e2eTest")
 }
+
+tasks.register("e2eTestHeaded") {
+    group = "verification"
+    description = "Run E2E tests with headed browser"
+    dependsOn(":backend:e2eTestHeaded")
+}

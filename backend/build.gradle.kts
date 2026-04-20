@@ -78,9 +78,7 @@ val copyFrontendForE2E = tasks.register<Copy>("copyFrontendForE2E") {
     into(e2eResourcesDir.map { it.dir("static") })
 }
 
-val e2eTest = tasks.register<Test>("e2eTest") {
-    description = "Run Playwright E2E tests"
-    group = "verification"
+fun Test.configureE2E() {
     dependsOn(copyFrontendForE2E)
     useJUnitPlatform()
     include("**/e2e/**")
@@ -93,15 +91,31 @@ val e2eTest = tasks.register<Test>("e2eTest") {
     classpath = files(e2eResourcesDir) + sourceSets["test"].runtimeClasspath
 }
 
+val e2eTest = tasks.register<Test>("e2eTest") {
+    description = "Run Playwright E2E tests"
+    group = "verification"
+    configureE2E()
+}
+
+// ブラウザを headed 起動して E2E を実行する（WSLg 等で画面表示したい場合に利用）
+val e2eTestHeaded = tasks.register<Test>("e2eTestHeaded") {
+    description = "Run Playwright E2E tests with headed browser"
+    group = "verification"
+    configureE2E()
+    environment("HEADLESS", "false")
+    // 毎回再実行したいので UP-TO-DATE にさせない
+    outputs.upToDateWhen { false }
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
     testLogging {
         events("passed", "failed", "skipped")
     }
-    // e2eTest は JaCoCo 対象外とする
+    // e2eTest / e2eTestHeaded は JaCoCo 対象外とする
     // finalizedBy に jacocoTestReport を含めると dependsOn(tasks.test) が引き込まれ
-    // e2eTest 実行時に test タスクも実行されてしまうため除外している
-    if (name != "e2eTest") {
+    // e2e 実行時に test タスクも実行されてしまうため除外している
+    if (name != "e2eTest" && name != "e2eTestHeaded") {
         finalizedBy(tasks.jacocoTestReport)
     }
 }

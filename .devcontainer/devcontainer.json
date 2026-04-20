@@ -17,6 +17,12 @@
     }
   },
   "forwardPorts": [8080, 5173],
+  "containerEnv": {
+    "DISPLAY": "${localEnv:DISPLAY}",
+    "WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}",
+    "XDG_RUNTIME_DIR": "/mnt/wslg/runtime-dir",
+    "PULSE_SERVER": "/mnt/wslg/PulseServer"
+  },
   "postCreateCommand": "sudo chown -R ubuntu:ubuntu /home/ubuntu/.gradle /home/ubuntu/.claude",
   "remoteUser": "ubuntu"
 }

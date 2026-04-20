@@ -7,6 +7,9 @@ services:
       - ../..:/workspaces:cached
       - gradle-cache:/home/ubuntu/.gradle
       - claude-data:/home/ubuntu/.claude
+      # WSLg からウィンドウを表示するためのマウント（Windows + WSL2 環境で有効）
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /mnt/wslg:/mnt/wslg
     command: sleep infinity
     network_mode: service:db
 

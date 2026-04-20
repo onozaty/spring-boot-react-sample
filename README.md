@@ -173,6 +173,9 @@ java -jar backend/build/libs/backend-0.0.1-SNAPSHOT.jar
 # E2E テスト（Playwright）
 ./gradlew :backend:e2eTest
 
+# E2E テスト（ブラウザ表示あり）
+./gradlew :backend:e2eTestHeaded
+
 # フォーマット
 ./gradlew :backend:spotlessApply
 
@@ -181,6 +184,8 @@ java -jar backend/build/libs/backend-0.0.1-SNAPSHOT.jar
 ```
 
 E2E テストはフロントエンドのビルド（`frontend/dist/`）を必要とします。初回および frontend 変更後は自動でビルドが実行されます。
+
+`e2eTestHeaded` はブラウザを headed 起動するため、Windows + WSL2 環境では WSLg 経由でブラウザウィンドウが表示されます。`devcontainer.json` で WSLg のソケットと `DISPLAY` 環境変数をコンテナに引き込む設定を入れているため、追加設定は不要です。
 
 ### フロントエンド
 
