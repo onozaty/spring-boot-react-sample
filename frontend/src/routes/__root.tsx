@@ -31,7 +31,7 @@ function RootLayout() {
     <>
       {!isLogin && <AppHeader />}
       <Outlet />
-      <Toaster richColors position="top-right" />
+      <Toaster richColors position="top-center" closeButton />
     </>
   )
 }
